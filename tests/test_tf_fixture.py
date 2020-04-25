@@ -1,5 +1,7 @@
 import pytest
+
 from pytest_terraform import tf
+
 
 TF_REPLAY = True
 

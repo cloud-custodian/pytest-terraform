@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+
 import pytest
 
 from pytest_terraform import tf
@@ -77,7 +78,7 @@ def xtest_bar_fixture(testdir):
 
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines(
-        ["*::test_sth PASSED*",]
+        ["*::test_sth PASSED*"]
     )
 
     # make sure that that we get a '0' exit code for the testsuite
@@ -118,7 +119,7 @@ def test_plugins_ini_setting(testdir):
 
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines(
-        ["*::test_hello_world PASSED*",]
+        ["*::test_hello_world PASSED*"]
     )
 
     # make sure that that we get a '0' exit code for the testsuite
