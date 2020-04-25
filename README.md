@@ -7,26 +7,27 @@ This plugin features uses a fixture factory pattern to enable dynamic
 construction of fixtures as either as test decorators or module level
 variables.
 
-
-## Philosophy
-
-The usage/philosophy of this plugin is based on using flight recording
-for unit tests against cloud infrastructure. In flight recording rather
-than mocking or stubbing infrastructure, actual resources are created
-and interacted with with responses recorded, with those responses
-subsequently replayed for fast test execution. Beyond the fidelity
-offered, this also enables these tests to be executed/re-recorded against
-live infrastructure for additional functional/release testing.
-
-
 ## Decorator Usage
 
 ```python
 from pytest_terraform import terraform
 from boto3 import Session
 
-@terraform('aws_sqs')
+# The terraform module name aws_sqs will be searched looked for in current
+# directory, subdirectories, named terraform, and per a module search path.
+#
+# This fixture specifies a session scope and will be run once per test run.
+# File locking and a test log are used to ensure that behavior when using
+# pytest-xdist.
+#
+# The decorator will create a fixture with the name of the terraform module
+#
+@terraform('aws_sqs', scope='session')
 def test_sqs(aws_sqs):
+
+    assert aws_sqs.resources["aws_sqs_queue.terraform_queue.tags"] == {
+        "Environment": "production"
+    }
    queue_url = aws_sqs['test_queue.queue_url']
    print(queue_url)
 
@@ -43,9 +44,10 @@ def test_sqs_dlq(aws_sqs):
    pass
 ```
 
-*Note* the fixture name should match the terraform module name.
+*Note* the fixture name should match the terraform module name
 
-## Variable Usage
+
+## Accessing Resource Attributes
 
 ```python
 from pytest_terraform import terraform
@@ -57,6 +59,12 @@ def test_queue(gcp_pub_sub):
 ```
 
 *Note* the fixture variable name should match the terraform module name.
+
+
+## Fixture support
+
+- This plugin supports all the standard pytest scopes, scope names can
+  be passed into the constructors.
 
 ## Fixture Usage
 
@@ -71,14 +79,15 @@ def test_
 *Note* The terraform state file is considered an internal
 implementation detail of terraform, not a stable interface. Also
 
+## Philosophy
 
-## Fixture support
-
-- This plugin supports all the standard pytest scopes, scope names can
-  be passed into the constructors.
-
-- It does not currently support parameterization of terraform fixtures,
-  although test functions can freely usee both.
+The usage/philosophy of this plugin is based on using flight recording
+for unit tests against cloud infrastructure. In flight recording rather
+than mocking or stubbing infrastructure, actual resources are created
+and interacted with with responses recorded, with those responses
+subsequently replayed for fast test execution. Beyond the fidelity
+offered, this also enables these tests to be executed/re-recorded against
+live infrastructure for additional functional/release testing.
 
 ## Replay Support
 
@@ -144,6 +153,3 @@ attempting to support same scope inter fixture dependencies as that
 imposes additional scheduling constraints outside of pytest native
 capabilities. The higher scoped root module will need to have output
 variables to enable this consumption.
-
-
-

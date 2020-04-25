@@ -13,17 +13,18 @@
 # limitations under the License.
 
 import os
-import pytest
 
 from collections import defaultdict
-from pytest_terraform import tf, xdist
+
+import pytest
+
+from pytest_terraform import tf
+from pytest_terraform import xdist
 
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
-    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or tf.find_binary(
-        "terraform"
-    )
+    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or tf.find_binary("terraform")
     tf.LazyPluginCacheDir.value = cache_dir = config.getoption("dest_tf_plugin")
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
@@ -46,9 +47,7 @@ def pytest_addoption(parser):
         "--tf-binary",
         action="store",
         dest="dest_tf_binary",
-        help=(
-            "Configure the path to the terraform binary. " "Default is to search PATH"
-        ),
+        help=("Configure the path to the terraform binary. " "Default is to search PATH"),
     )
     group.addoption(
         "--tf-db",

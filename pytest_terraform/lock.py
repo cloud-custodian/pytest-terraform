@@ -13,7 +13,9 @@
 # limitations under the License.
 
 import contextlib
+
 import portalocker
+
 from py.path import local
 
 
