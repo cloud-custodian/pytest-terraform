@@ -12,15 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from collections import defaultdict
 import json
 import os
 import subprocess
 import sys
 
-import jmespath
+from collections import defaultdict
+
 import pytest
+
 from py.path import local
+
+import jmespath
+
 
 # from .lock import lock_create, lock_delete
 
@@ -68,9 +72,7 @@ class TerraformRunner(object):
         self.module_dir = module_dir
         # use parent dir of work/data dir to avoid
         # https://github.com/hashicorp/terraform/issues/22999
-        self.state_path = state_path or os.path.join(
-            work_dir, "..", "terraform.tfstate"
-        )
+        self.state_path = state_path or os.path.join(work_dir, "..", "terraform.tfstate")
         self.stream_output = stream_output
         self.plugin_cache = plugin_cache or ""
         self.tf_bin = tf_bin
@@ -266,9 +268,7 @@ class TerraformFixture(object):
             self.test_dir.dirpath().join("terraform", self.tf_root_module),
         ]
         if LazyModuleDir.resolve():
-            candidates.insert(
-                0, local(LazyModuleDir.resolve()).join(self.tf_root_module)
-            )
+            candidates.insert(0, local(LazyModuleDir.resolve()).join(self.tf_root_module))
         for candidate in candidates:
             if not candidate.check(exists=1, dir=1):
                 continue
@@ -292,9 +292,7 @@ class TerraformFixture(object):
                     "Replay resources don't exist for %s" % self.tf_root_module
                 )
             return TerraformTestApi.load(os.path.join(module_dir, "tf_resources.json"))
-        work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join(
-            "work"
-        )
+        work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join("work")
         self.runner = self.get_runner(module_dir, work_dir)
         return self.create(request, module_dir)
 
@@ -346,13 +344,7 @@ class FixtureDecoratorFactory(object):
         if replay is None:
             replay = LazyReplay.resolve()
         tfix = tclass(
-            LazyTfBin,
-            LazyDb,
-            LazyPluginCacheDir,
-            scope,
-            terraform_dir,
-            test_dir,
-            replay,
+            LazyTfBin, LazyDb, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
         )
         marker = pytest.fixture(scope=scope, name=terraform_dir)
         return marker
@@ -381,13 +373,7 @@ class FixtureDecoratorFactory(object):
             return self.nonce_decorator
         tclass = self.scope_class_map[scope]
         tfix = tclass(
-            LazyTfBin,
-            LazyDb,
-            LazyPluginCacheDir,
-            scope,
-            terraform_dir,
-            test_dir,
-            replay,
+            LazyTfBin, LazyDb, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
         )
         self._fixtures.append(tfix)
         marker = pytest.fixture(scope=scope, name=terraform_dir)

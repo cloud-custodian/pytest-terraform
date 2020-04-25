@@ -16,7 +16,8 @@ import os
 import sys
 
 from pytest_terraform import tf
-from pytest_terraform.lock import lock_create, lock_delete
+from pytest_terraform.lock import lock_create
+from pytest_terraform.lock import lock_delete
 
 
 class ScopedTerraformFixture(tf.TerraformFixture):
