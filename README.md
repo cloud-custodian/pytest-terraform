@@ -153,6 +153,3 @@ attempting to support same scope inter fixture dependencies as that
 imposes additional scheduling constraints outside of pytest native
 capabilities. The higher scoped root module will need to have output
 variables to enable this consumption.
-
-
-

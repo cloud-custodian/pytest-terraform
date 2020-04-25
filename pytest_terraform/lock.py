@@ -14,9 +14,9 @@
 
 import contextlib
 
-from py.path import local
-
 import portalocker
+
+from py.path import local
 
 
 PollInterval = 5

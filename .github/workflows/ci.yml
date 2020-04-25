@@ -36,12 +36,12 @@ jobs:
         run: |
           curl -fsS -o get-poetry.py https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py
           python get-poetry.py -y
-          echo "::set-env name=PATH::$HOME/.poetry/bin:$PATH"          
+          echo "::set-env name=PATH::$HOME/.poetry/bin:$PATH"
 
       - name: Configure poetry
         shell: bash
         run: poetry config virtualenvs.in-project true
-  
+
       - name: Set up cache
         uses: actions/cache@v1
         id: cache
@@ -60,4 +60,4 @@ jobs:
 
       - name: Run pytest
         shell: bash
-        run: poetry run pytest -q tests          
+        run: poetry run pytest -q tests
