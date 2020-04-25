@@ -51,7 +51,8 @@ class ScopedTerraformFixture(tf.TerraformFixture):
     def tear_down(self):
         # print('%s %s fix teardown' % (self.wid, self.name), file=sys.stderr)
         with lock_delete(self.state_dir / self.name) as success:
-            #            print('%s %s teardown state:%s' % (self.wid, self.name, success), file=sys.stderr)
+            #  print('%s %s teardown state:%s' % (
+            #        self.wid, self.name, success), file=sys.stderr)
             if not success:
                 return
             work_dir = (self.state_dir / self.name).read_text("utf8")
@@ -132,8 +133,9 @@ class XDistTerraform(object):
                 found.append(f)
         if not found:
             return
-        #        print('%s worker teardown found: %s item used:%s tracked:%s' % (
-        #            self.wid, found, item.fixturenames, self.tracked_fixtures), file=sys.stderr)
+        # print(
+        #    '%s worker teardown found: %s item used:%s tracked:%s' % (
+        #    self.wid, found, item.fixturenames, self.tracked_fixtures), file=sys.stderr)
 
         completed = {n.strip() for n in self.test_log_reader.readlines()}
         self.completed.update(completed)
@@ -141,10 +143,11 @@ class XDistTerraform(object):
         # print("%s check teardown item:%s fixtures:%s completd:%s" % (
         #    self.wid, item.nodeid, found, self.completed), file=sys.stderr)
         for f in found:
-            #            print("%s check %s result %s" % (
-            #                self.wid, f, self.completed.issuperset(self.fixture_map[f])), file=sys.stderr)
-            #            print('%s check result %s %s:%s' % (
-            #                self.wid, completed, f, self.fixture_map[f]))
+            # print("%s check %s result %s" % (
+            #       self.wid, f, self.completed.issuperset(self.fixture_map[f])),
+            #       file=sys.stderr)
+            # print('%s check result %s %s:%s' % (
+            #       self.wid, completed, f, self.fixture_map[f]))
             if self.completed.issuperset(self.fixture_map[f]):
                 print(
                     "%s execute test:%s teardown %s" % (self.wid, item.nodeid, f),
