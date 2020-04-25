@@ -337,17 +337,18 @@ class FixtureDecoratorFactory(object):
                 return f
         raise KeyError(name)
 
-    def fixture(self, terraform_dir, scope="function", replay=None, name=None):
-        tclass = self.scope_class_map[scope]
-        f = sys._getframe(1)
-        test_dir = local(f.f_locals["__file__"]).dirpath()
-        if replay is None:
-            replay = LazyReplay.resolve()
-        tfix = tclass(
-            LazyTfBin, LazyDb, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
-        )
-        marker = pytest.fixture(scope=scope, name=terraform_dir)
-        return marker
+#    def fixture(self, terraform_dir, scope="function", replay=None, name=None):
+#        tclass = self.scope_class_map[scope]
+#        f = sys._getframe(1)
+#        test_dir = local(f.f_locals["__file__"]).dirpath()
+#        if replay is None:
+#            replay = LazyReplay.resolve()
+#        tfix = tclass(
+#            LazyTfBin, LazyDb, LazyPluginCacheDir, scope,
+#            terraform_dir, test_dir, replay,
+#        )
+#        marker = pytest.fixture(scope=scope, name=terraform_dir)
+#        return marker
 
     def __call__(self, terraform_dir, scope="function", replay=None, name=None):
         # We have to hook into where fixture discovery will find
