@@ -29,9 +29,6 @@ def pytest_configure(config):
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     tf.LazyReplay.value = config.getoption("dest_tf_replay")
-    tf.LazyDbPath.value = config.getoption("dest_tf_db") or os.path.join(
-        os.getcwd(), "tf.db"
-    )
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
@@ -47,17 +44,7 @@ def pytest_addoption(parser):
         "--tf-binary",
         action="store",
         dest="dest_tf_binary",
-        help=("Configure the path to the terraform binary. " "Default is to search PATH"),
-    )
-    group.addoption(
-        "--tf-db",
-        action="store",
-        dest="dest_tf_db",
-        default=".tfcache/tf.db",
-        help=(
-            "Configure the path to the plugins state file. "
-            "Default is to use file in tf-plugin-dir"
-        ),
+        help=("Configure the path to the terraform binary. Default is to search PATH"),
     )
     group.addoption(
         "--tf-replay",
@@ -69,7 +56,7 @@ def pytest_addoption(parser):
         "--tf-mod-dir",
         action="store",
         dest="dest_tf_mod_dir",
-        help=("Configue the parent directory to look " "for terraform modules"),
+        help=("Configue the parent directory to look for terraform modules"),
     )
     group.addoption(
         "--tf-plugin-dir",

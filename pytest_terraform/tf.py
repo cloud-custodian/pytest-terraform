@@ -25,9 +25,6 @@ import pytest
 from py.path import local
 
 
-# from .lock import lock_create, lock_delete
-
-
 def find_binary(bin_name):
     parts = os.environ["PATH"].split(":")
     for p in parts:
@@ -229,7 +226,6 @@ class PlaceHolderValue(object):
         return self.value or default
 
 
-LazyDb = PlaceHolderValue("db")
 LazyReplay = PlaceHolderValue("tf_replay")
 LazyModuleDir = PlaceHolderValue("module_dir")
 LazyPluginCacheDir = PlaceHolderValue("plugin_cache")
@@ -242,15 +238,13 @@ class TerraformFixture(object):
     _AutoTearDown = True
 
     def __init__(
-        self, tf_bin, tf_db, plugin_cache, scope, tf_root_module, test_dir, replay
+        self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay
     ):
         self.tf_bin = tf_bin
-        self.tf_db = tf_db
         self.tf_root_module = tf_root_module
         self.test_dir = test_dir
         self.scope = scope
         self.replay = replay
-        self.db = None
         self.runner = None
 
     @property
@@ -373,7 +367,7 @@ class FixtureDecoratorFactory(object):
             return self.nonce_decorator
         tclass = self.scope_class_map[scope]
         tfix = tclass(
-            LazyTfBin, LazyDb, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
+            LazyTfBin, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
         )
         self._fixtures.append(tfix)
         marker = pytest.fixture(scope=scope, name=terraform_dir)

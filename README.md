@@ -3,9 +3,8 @@
 pytest_terraform is a pytest plugin that enables executing terraform
 to provision infrastructure in a unit/functional test as a fixture.
 
-This plugin features uses a fixture factory pattern to enable dynamic
-construction of fixtures as either as test decorators or module level
-variables.
+This plugin features uses a fixture factory pattern to enable paramterized
+construction of fixtures via decorators.
 
 ## Decorator Usage
 
