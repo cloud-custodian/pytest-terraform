@@ -20,6 +20,11 @@ def test_tf_user_c(local_foo):
     print("test invoked c")
 
 
+def test_fixture_factory():
+    with pytest.raises(KeyError):
+        tf.terraform.get_fixture("abc")
+
+
 def test_tf_resources():
     state = tf.TerraformState.load(
         os.path.join(os.path.dirname(__file__), "burnify.tfstate")
