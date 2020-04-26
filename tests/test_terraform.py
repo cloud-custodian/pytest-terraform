@@ -2,7 +2,6 @@
 import os
 
 import pytest
-
 from pytest_terraform import tf
 
 

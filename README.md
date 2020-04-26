@@ -9,8 +9,9 @@ construction of fixtures via decorators.
 ## Usage
 
 ```python
-from pytest_terraform import terraform
 from boto3 import Session
+from pytest_terraform import terraform
+
 
 # The terraform module name aws_sqs will be searched looked for in current
 # directory, subdirectories, named terraform, and per a module search path.
@@ -64,7 +65,6 @@ across versions.
 ## Options
 
 You can provide the path to the terraform binary else its auto discovered
-from `$PATH`.
 ```shell
 --tf-binary=$HOME/bin/terraform
 ```
@@ -106,7 +106,7 @@ directory, that will be used when in replay mode.
 
 ### Recording
 
-TODO ~ 
+TODO ~
 
 ## XDist Compatibility
 

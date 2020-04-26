@@ -1,3 +1,4 @@
+exclude: ".json"
 repos:
   - repo: https://github.com/psf/black
     rev: 19.10b0
@@ -13,7 +14,7 @@ repos:
     rev: 4.3.21-2
     hooks:
       - id: isort
-        additional_dependencies: [toml]
+        additional_dependencies: [pyproject]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0

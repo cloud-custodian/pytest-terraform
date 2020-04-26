@@ -13,13 +13,10 @@
 # limitations under the License.
 
 import os
-
 from collections import defaultdict
 
 import pytest
-
-from pytest_terraform import tf
-from pytest_terraform import xdist
+from pytest_terraform import tf, xdist
 
 
 @pytest.hookimpl(trylast=True)

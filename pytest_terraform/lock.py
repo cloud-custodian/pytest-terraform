@@ -15,9 +15,7 @@
 import contextlib
 
 import portalocker
-
 from py.path import local
-
 
 PollInterval = 5
 LockTimeout = 300
