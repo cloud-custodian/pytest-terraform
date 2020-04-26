@@ -22,7 +22,7 @@ def test_tf_user_c(local_foo):
 
 def test_fixture_factory():
     with pytest.raises(KeyError):
-        tf.terraform.get_fixture('abc')
+        tf.terraform.get_fixture("abc")
 
 
 def test_tf_resources():
