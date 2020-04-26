@@ -302,11 +302,6 @@ class TerraformFixture(object):
         self.runner.destroy()
 
 
-class LockScopeFixture(TerraformFixture):
-    def create(self, request, module_dir):
-        pass
-
-
 class FixtureDecoratorFactory(object):
     """Generate fixture decorators on the fly.
     """

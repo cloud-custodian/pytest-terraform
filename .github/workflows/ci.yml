@@ -58,6 +58,14 @@ jobs:
         shell: bash
         run: poetry install
 
-      - name: Run pytest
+      - name: Coverage run pytest
         shell: bash
-        run: poetry run pytest -q tests
+        run: poetry run coverage run --source pytest_terraform -m pytest tests
+
+      - name: Coverage report
+        shell: bash
+        run: poetry run coverage report --fail-under=91
+
+      - name: Pytest run w/ xdist
+        shell: bash
+        run: poetry run pytest -v -n auto tests
