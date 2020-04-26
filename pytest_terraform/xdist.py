@@ -158,7 +158,7 @@ class XDistTerraform(object):
 
     def pytest_sessionfinish(self, exitstatus):
         if self.wid == "master":
-            print("master session finish", file=sys.stderr)
+            # print("master session finish", file=sys.stderr)
             return
 
         completed = {n.strip() for n in self.test_log_reader.readlines()}

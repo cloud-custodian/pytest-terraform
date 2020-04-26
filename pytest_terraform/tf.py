@@ -236,9 +236,7 @@ class TerraformFixture(object):
 
     _AutoTearDown = True
 
-    def __init__(
-        self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay
-    ):
+    def __init__(self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay):
         self.tf_bin = tf_bin
         self.tf_root_module = tf_root_module
         self.test_dir = test_dir
