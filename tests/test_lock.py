@@ -1,5 +1,4 @@
-from pytest_terraform.lock import lock_create
-from pytest_terraform.lock import lock_delete
+from pytest_terraform.lock import lock_create, lock_delete
 
 
 def test_lock_create(tmpdir):

@@ -16,16 +16,11 @@ import json
 import os
 import subprocess
 import sys
-
 from collections import defaultdict
 
 import jmespath
 import pytest
-
 from py.path import local
-
-
-# from .lock import lock_create, lock_delete
 
 
 def find_binary(bin_name):
@@ -229,11 +224,9 @@ class PlaceHolderValue(object):
         return self.value or default
 
 
-LazyDb = PlaceHolderValue("db")
 LazyReplay = PlaceHolderValue("tf_replay")
 LazyModuleDir = PlaceHolderValue("module_dir")
 LazyPluginCacheDir = PlaceHolderValue("plugin_cache")
-LazyDbPath = PlaceHolderValue("tf_db_path")
 LazyTfBin = PlaceHolderValue("tf_bin_path")
 
 
@@ -241,16 +234,12 @@ class TerraformFixture(object):
 
     _AutoTearDown = True
 
-    def __init__(
-        self, tf_bin, tf_db, plugin_cache, scope, tf_root_module, test_dir, replay
-    ):
+    def __init__(self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay):
         self.tf_bin = tf_bin
-        self.tf_db = tf_db
         self.tf_root_module = tf_root_module
         self.test_dir = test_dir
         self.scope = scope
         self.replay = replay
-        self.db = None
         self.runner = None
 
     @property
@@ -336,19 +325,6 @@ class FixtureDecoratorFactory(object):
                 return f
         raise KeyError(name)
 
-    #    def fixture(self, terraform_dir, scope="function", replay=None, name=None):
-    #        tclass = self.scope_class_map[scope]
-    #        f = sys._getframe(1)
-    #        test_dir = local(f.f_locals["__file__"]).dirpath()
-    #        if replay is None:
-    #            replay = LazyReplay.resolve()
-    #        tfix = tclass(
-    #            LazyTfBin, LazyDb, LazyPluginCacheDir, scope,
-    #            terraform_dir, test_dir, replay,
-    #        )
-    #        marker = pytest.fixture(scope=scope, name=terraform_dir)
-    #        return marker
-
     def __call__(self, terraform_dir, scope="function", replay=None, name=None):
         # We have to hook into where fixture discovery will find
         # our fixtures, the easiest option is to store on the module that
@@ -373,7 +349,7 @@ class FixtureDecoratorFactory(object):
             return self.nonce_decorator
         tclass = self.scope_class_map[scope]
         tfix = tclass(
-            LazyTfBin, LazyDb, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
+            LazyTfBin, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
         )
         self._fixtures.append(tfix)
         marker = pytest.fixture(scope=scope, name=terraform_dir)

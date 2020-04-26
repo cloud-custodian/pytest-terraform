@@ -16,8 +16,7 @@ import os
 import sys
 
 from pytest_terraform import tf
-from pytest_terraform.lock import lock_create
-from pytest_terraform.lock import lock_delete
+from pytest_terraform.lock import lock_create, lock_delete
 
 
 class ScopedTerraformFixture(tf.TerraformFixture):
@@ -158,7 +157,7 @@ class XDistTerraform(object):
 
     def pytest_sessionfinish(self, exitstatus):
         if self.wid == "master":
-            print("master session finish", file=sys.stderr)
+            # print("master session finish", file=sys.stderr)
             return
 
         completed = {n.strip() for n in self.test_log_reader.readlines()}
