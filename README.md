@@ -1,5 +1,8 @@
 # Introduction
 
+[![CI](https://github.com/cloud-custodian/pytest-terraform/workflows/CI/badge.svg?branch=master&event=push)](https://github.com/cloud-custodian/pytest-terraform/actions?query=branch%3Amaster)
+[![codecov](https://codecov.io/gh/cloud-custodian/pytest-terraform/branch/master/graph/badge.svg)](https://codecov.io/gh/cloud-custodian/pytest-terraform)
+
 pytest_terraform is a pytest plugin that enables executing terraform
 to provision infrastructure in a unit/functional test as a fixture.
 
