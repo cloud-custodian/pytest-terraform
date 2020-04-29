@@ -1,5 +1,8 @@
 # Introduction
 
+[![CI](https://github.com/cloud-custodian/pytest-terraform/workflows/CI/badge.svg?branch=master&event=push)](https://github.com/cloud-custodian/pytest-terraform/actions?query=branch%3Amaster)
+[![codecov](https://codecov.io/gh/cloud-custodian/pytest-terraform/branch/master/graph/badge.svg)](https://codecov.io/gh/cloud-custodian/pytest-terraform)
+
 pytest_terraform is a pytest plugin that enables executing terraform
 to provision infrastructure in a unit/functional test as a fixture.
 
@@ -13,14 +16,16 @@ from boto3 import Session
 from pytest_terraform import terraform
 
 
-# The terraform module name aws_sqs will be searched looked for in current
-# directory, subdirectories, named terraform, and per a module search path.
+# We use the terraform decorator to create a fixture with the name of
+# the terraform module.
+#
+# The test function will be invoked after the terraform module is provisioned
+# with the results of the provisioning.
+#
+# The module `aws_sqs` will be searched for in several directories, the test
+# file directory, a sub directory `terraform`.
 #
 # This fixture specifies a session scope and will be run once per test run.
-# File locking and a test log are used to ensure that behavior when using
-# pytest-xdist.
-#
-# The decorator will create a fixture with the name of the terraform module
 #
 @terraform('aws_sqs', scope='session')
 def test_sqs(aws_sqs):
