@@ -5,5 +5,4 @@ lint:
 
 coverage:
 	coverage run --source pytest_terraform -m pytest tests
-        coverage report
-
+	coverage report
