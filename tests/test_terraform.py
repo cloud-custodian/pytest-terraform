@@ -5,6 +5,20 @@ import pytest
 from pytest_terraform import tf
 
 
+def test_frame_walk():
+    class Frame:
+        def __init__(self, f_locals, f_back=None):
+            self.f_locals = f_locals
+            self.f_back = f_back
+
+    parent = Frame({"__file__": "/tmp/file.py"})
+    child = Frame({}, parent)
+    assert tf._frame_path(child) == "/tmp/file.py"
+
+    with pytest.raises(RuntimeError):
+        tf._frame_path(Frame({}))
+
+
 @tf.terraform("local_bar", scope="session")
 def test_tf_user_a(local_bar):
     print("test invoked a")

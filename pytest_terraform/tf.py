@@ -330,7 +330,7 @@ class FixtureDecoratorFactory(object):
         # on the other.
         f = sys._getframe(1)
         name = name or terraform_dir
-        test_dir = local(f.f_locals["__file__"]).dirpath()
+        test_dir = local(_frame_path(f)).dirpath()
         if replay is None:
             replay = LazyReplay.resolve()
         found = None
@@ -354,6 +354,15 @@ class FixtureDecoratorFactory(object):
     @staticmethod
     def nonce_decorator(func):
         return func
+
+
+def _frame_path(f):
+    start = f
+    while f:
+        if "__file__" in f.f_locals:
+            return f.f_locals["__file__"]
+        f = f.f_back
+    raise RuntimeError("frame path not found %s" % start)
 
 
 terraform = FixtureDecoratorFactory()
