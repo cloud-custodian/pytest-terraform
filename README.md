@@ -11,6 +11,18 @@ construction of fixtures via decorators.
 
 ## Usage
 
+pytest_terraform provides a `terraform` decorator with the following parameters:
+
+| Argument             | Required? | Type    | Default      | Description |
+| -----                | :---:     | ---     | ---          | ---         |
+| `terraform_dir`      | yes       | String  |              | Terraform module (directory) to execute. |
+| `scope`              | no        | String  | `"function"` | [Pytest scope](https://docs.pytest.org/en/stable/fixture.html#scope-sharing-fixtures-across-classes-modules-packages-or-session) - should be one of: `function`, or `session`. Other scopes like  `class`, `module`, and `package` should work but have not been fully tested. |
+| `replay`             | no        | Boolean | `True`       | Use recorded resources instead of invoking terraform. See [Replay Support](#replay-support) for more details. |
+| `name`               | no        | String  | `None`       | Name used for the fixture. This defaults to the `terraform_dir` when `None` is supplied. |
+| `teardown`           | no        | String  | `"default"`  | Configure which teardown mode is used for terraform resources. See [Teardown Options](#teardown-options) for more details. |
+
+### Example
+
 ```python
 from boto3 import Session
 from pytest_terraform import terraform
@@ -51,6 +63,7 @@ def test_sqs_deliver(aws_sqs):
    sqs.send_message(
        QueueUrl=aws_sqs['test_queue.queue_url'],
        MessageBody=b"123")
+
 
 @terraform('aws_sqs')
 def test_sqs_dlq(aws_sqs):
@@ -93,6 +106,31 @@ This plugin also supports flight recording (see next section)
 ```shell
 --tf-replay=[record|replay|disable]
 ```
+
+### Teardown Options
+
+`pytest_terraform` supports three different teardown modes for the terraform decorator.
+The default, `pytest_terraform.teardown.ON` will always attempt to teardown any and all modules via `terraform destory`.
+If for any reason destroy fails it will raise an exception to alert the test runner.
+The next mode, `pytest_terraform.teardown.IGNORE`, will invoke `terraform destroy` as with `teardown.ON` but will ignore any failures.
+This mode is particularly help if your test function performs destructive actions against any objects created by the terraform module.
+The final option is `pytest_terraform.teardown.OFF` which will remove the teardown method register all together.
+This should generally only be used in very specific situations and is considered an edge case.
+
+There is a special `pytest_terraform.teardown.DEFAULT` which is what the `teardown` parameter actually defaults to.
+This "default" option can be overriden either at runtime via the CLI or pytest ini with:
+
+```shell
+--tf-teardown=ignore
+```
+
+```ini
+[pytest]
+terraform-teardown = off
+```
+
+*Note* `default` is not a valid option for either the commandline override or ini option.
+Instead it's an internal mode which can be used for those looking to be more explicit in their decorator invocations.
 
 ## Flight Recording
 

@@ -16,7 +16,7 @@ import os
 from collections import defaultdict
 
 import pytest
-from pytest_terraform import tf, xdist
+from pytest_terraform import options, tf, xdist
 
 
 @pytest.hookimpl(trylast=True)
@@ -25,6 +25,11 @@ def pytest_configure(config):
     tf.LazyPluginCacheDir.value = cache_dir = config.getoption("dest_tf_plugin")
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
+    options.teardown.set_default(
+        config.getoption("dest_tf_teardown")
+        or config.getini("terraform-teardown")
+        or None
+    )
     tf.LazyReplay.value = config.getoption("dest_tf_replay")
     tf.LazyModuleDir.value = config.getoption("dest_tf_mod_dir") or config.getini(
         "terraform-mod-dir"
@@ -68,5 +73,19 @@ def pytest_addoption(parser):
             "Default is to use .tfcache"
         ),
     )
+    group.addoption(
+        "--tf-teardown",
+        action="store",
+        dest="dest_tf_teardown",
+        default="on",
+        choices=["on", "off", "ignore"],
+        help=(
+            "Configure which teardown mode is used as default for terraform resources. "
+            "Options are on, off, silent"
+        ),
+    )
 
     parser.addini("terraform-mod-dir", "Parent Directory for terraform modules")
+    parser.addini(
+        "terraform-teardown", "Which teardown mode to use as default: on, off, silent"
+    )

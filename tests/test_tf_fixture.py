@@ -1,3 +1,6 @@
+import subprocess
+from unittest.mock import MagicMock, patch
+
 import pytest
 from pytest_terraform import tf
 
@@ -34,3 +37,94 @@ def test_tf_user_c(aws_sqs, aws_sns):
 
 def test_tf_user_many(aws_sqs, number_sequence):
     return number_sequence
+
+
+def test_tf_teardown_register():
+    fixture = tf.TerraformFixture(
+        tf_bin="fakebin",
+        plugin_cache="fakecache",
+        scope="function",
+        tf_root_module="fakeroot",
+        test_dir="fakedir",
+        replay=False,
+        teardown=tf.td.ON,
+    )
+
+    fixture.runner = MagicMock()
+    request = MagicMock()
+
+    fixture.create(request, MagicMock())
+
+    request.addfinalizer.assert_called()
+
+
+def test_tf_teardown_exception():
+    import subprocess
+
+    fixture = tf.TerraformFixture(
+        tf_bin="fakebin",
+        plugin_cache="fakecache",
+        scope="function",
+        tf_root_module="fakeroot",
+        test_dir="fakedir",
+        replay=False,
+        teardown=tf.td.ON,
+    )
+
+    request = MagicMock()
+    fixture.runner = MagicMock()
+    fixture.runner.destroy.side_effect = [subprocess.CalledProcessError(99, "test")]
+
+    fixture.create(request, MagicMock())
+    pytest.raises(tf.TerraformCommandFailed, fixture.tear_down)
+
+
+def test_tf_teardown_register_ignore():
+
+    fixture = tf.TerraformFixture(
+        tf_bin="fakebin",
+        plugin_cache="fakecache",
+        scope="function",
+        tf_root_module="fakeroot",
+        test_dir="fakedir",
+        replay=False,
+        teardown=tf.td.IGNORE,
+    )
+
+    request = MagicMock()
+    fixture.runner = MagicMock()
+    fixture.runner.destroy.side_effect = [subprocess.CalledProcessError(99, "test")]
+
+    fixture.create(request, MagicMock())
+    fixture.tear_down()
+
+    request.addfinalizer.assert_called()
+
+
+def test_tf_skip_teardown_register():
+    fixture = tf.TerraformFixture(
+        tf_bin="fakebin",
+        plugin_cache="fakecache",
+        scope="function",
+        tf_root_module="fakeroot",
+        test_dir="fakedir",
+        replay=False,
+        teardown=tf.td.OFF,
+    )
+
+    fixture.runner = MagicMock()
+    request = MagicMock()
+
+    fixture.create(request, MagicMock())
+
+    request.addfinalizer.assert_not_called()
+
+
+@patch.object(tf.TerraformFixture, "__call__")
+@patch("pytest_terraform.tf._frame_path")
+@patch("pytest_terraform.tf.pytest")
+def test_tf_factory_teardown_config_default(_, frame_path_mock, fixture_call_mock):
+    frame_path_mock.return_value = "."
+    df = tf.FixtureDecoratorFactory()
+    df(terraform_dir="test")
+    assert df._fixtures[0].teardown_config == tf.td.ON
