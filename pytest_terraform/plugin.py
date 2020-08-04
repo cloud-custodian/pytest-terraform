@@ -26,6 +26,9 @@ def pytest_configure(config):
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
     tf.LazyReplay.value = config.getoption("dest_tf_replay")
+    tf.LazyModuleDir.value = config.getoption("dest_tf_mod_dir") or config.getini(
+        "terraform-mod-dir"
+    )
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))

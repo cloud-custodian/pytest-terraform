@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+from pathlib import Path
 
 import pytest
 from pytest_terraform import tf
@@ -135,6 +136,37 @@ def test_plugins_ini_setting(testdir):
 
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines(["*::test_hello_world PASSED*"])
+
+    # make sure that that we get a '0' exit code for the testsuite
+    assert result.ret == 0
+
+
+@pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")
+def test_plugins_ini_setting_terraform_mod_dir(testdir):
+    mod_dir = Path(__file__).parent / "data" / "mrofarret"
+    testdir.makeini(
+        f"""
+        [pytest]
+        terraform-mod-dir = {mod_dir}
+    """
+    )
+
+    testdir.makepyfile(
+        """
+        import pytest
+        from pytest_terraform import terraform
+
+        @terraform("local_baz")
+        def test_local_baz(local_baz):
+            assert local_baz['local_file.baz.content'] == 'baz!'
+            return
+    """
+    )
+
+    result = testdir.runpytest("-v", "-s")
+
+    # fnmatch_lines does an assertion internally
+    result.stdout.fnmatch_lines(["*::test_local_baz PASSED*"])
 
     # make sure that that we get a '0' exit code for the testsuite
     assert result.ret == 0
