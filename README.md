@@ -118,19 +118,6 @@ The final option is `pytest_terraform.teardown.OFF` which will remove the teardo
 This should generally only be used in very specific situations and is considered an edge case.
 
 There is a special `pytest_terraform.teardown.DEFAULT` which is what the `teardown` parameter actually defaults to.
-This "default" option can be overriden either at runtime via the CLI or pytest ini with:
-
-```shell
---tf-teardown=ignore
-```
-
-```ini
-[pytest]
-terraform-teardown = off
-```
-
-*Note* `default` is not a valid option for either the commandline override or ini option.
-Instead it's an internal mode which can be used for those looking to be more explicit in their decorator invocations.
 
 ## Flight Recording
 
