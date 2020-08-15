@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__all__ = ["terraform"]
+__all__ = ["terraform", "teardown"]
 
+from .options import teardown
 from .tf import terraform

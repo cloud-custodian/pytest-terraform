@@ -22,6 +22,9 @@ import jmespath
 import pytest
 from py.path import local
 
+from .exceptions import TerraformCommandFailed
+from .options import teardown as td
+
 
 def find_binary(bin_name):
     parts = os.environ["PATH"].split(":")
@@ -231,16 +234,16 @@ LazyTfBin = PlaceHolderValue("tf_bin_path")
 
 
 class TerraformFixture(object):
-
-    _AutoTearDown = True
-
-    def __init__(self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay):
+    def __init__(
+        self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay, teardown
+    ):
         self.tf_bin = tf_bin
         self.tf_root_module = tf_root_module
         self.test_dir = test_dir
         self.scope = scope
         self.replay = replay
         self.runner = None
+        self.teardown_config = td.resolve(teardown)
 
     @property
     def name(self):
@@ -287,7 +290,7 @@ class TerraformFixture(object):
     def create(self, request, module_dir):
         print("tf create %s" % self.tf_root_module, file=sys.stderr)
         self.runner.init()
-        if self._AutoTearDown:
+        if self.teardown_config != td.OFF:
             request.addfinalizer(self.tear_down)
         try:
             test_api = self.runner.apply()
@@ -299,7 +302,12 @@ class TerraformFixture(object):
     def tear_down(self):
         # config behavor on runner
         print("tf teardown %s" % self.tf_root_module, file=sys.stderr)
-        self.runner.destroy()
+        try:
+            self.runner.destroy()
+        except subprocess.CalledProcessError as e:
+            if self.teardown_config == td.IGNORE:
+                return
+            raise TerraformCommandFailed from e
 
 
 class FixtureDecoratorFactory(object):
@@ -320,7 +328,9 @@ class FixtureDecoratorFactory(object):
                 return f
         raise KeyError(name)
 
-    def __call__(self, terraform_dir, scope="function", replay=None, name=None):
+    def __call__(
+        self, terraform_dir, scope="function", replay=None, name=None, teardown=td.DEFAULT
+    ):
         # We have to hook into where fixture discovery will find
         # our fixtures, the easiest option is to store on the module that
         # originated the call, all test modules get scanned for
@@ -344,7 +354,13 @@ class FixtureDecoratorFactory(object):
             return self.nonce_decorator
         tclass = self.scope_class_map[scope]
         tfix = tclass(
-            LazyTfBin, LazyPluginCacheDir, scope, terraform_dir, test_dir, replay,
+            LazyTfBin,
+            LazyPluginCacheDir,
+            scope,
+            terraform_dir,
+            test_dir,
+            replay,
+            teardown,
         )
         self._fixtures.append(tfix)
         marker = pytest.fixture(scope=scope, name=terraform_dir)
