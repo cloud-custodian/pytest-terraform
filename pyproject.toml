@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-terraform"
-version = "0.2.0"
+version = "0.2.1"
 description = "A pytest plugin for using terraform fixtures"
 authors = ["Kapil Thangavelu <kapilt@gmail.com>"]
 license = "Apache-2.0"
