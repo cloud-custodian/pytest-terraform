@@ -34,8 +34,10 @@ def pytest_configure(config):
 
     tf.LazyTfBin.value = config.getoption("dest_tf_binary") or tf.find_binary("terraform")
     if tf.LazyTfBin.value is None and not tf.LazyReplay.value:
-        raise ValueError('pytest-terraform requires terraform binary on PATH or '
-                         'specified with --tf-binary')
+        raise ValueError(
+            "pytest-terraform requires terraform binary on PATH or "
+            "specified with --tf-binary"
+        )
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
