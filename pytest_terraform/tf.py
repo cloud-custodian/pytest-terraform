@@ -214,7 +214,7 @@ class PlaceHolderValue(object):
     many of our instantiations are at module import time, to support
     runtime configuration from cli/ini options we utilize a lazy
     loaded value set which is configured for final values via hooks
-    (early, post conf, pre collection).)
+    (early, post conf, pre collection).
     """
 
     def __init__(self, name):
@@ -231,11 +231,20 @@ LazyReplay = PlaceHolderValue("tf_replay")
 LazyModuleDir = PlaceHolderValue("module_dir")
 LazyPluginCacheDir = PlaceHolderValue("plugin_cache")
 LazyTfBin = PlaceHolderValue("tf_bin_path")
+PytestConfig = PlaceHolderValue("pytestconfig")
 
 
 class TerraformFixture(object):
     def __init__(
-        self, tf_bin, plugin_cache, scope, tf_root_module, test_dir, replay, teardown
+        self,
+        tf_bin,
+        plugin_cache,
+        scope,
+        tf_root_module,
+        test_dir,
+        replay,
+        teardown,
+        pytest_config,
     ):
         self.tf_bin = tf_bin
         self.tf_root_module = tf_root_module
@@ -244,6 +253,7 @@ class TerraformFixture(object):
         self.replay = replay
         self.runner = None
         self.teardown_config = td.resolve(teardown)
+        self.config = pytest_config
 
     @property
     def name(self):
@@ -294,6 +304,7 @@ class TerraformFixture(object):
             request.addfinalizer(self.tear_down)
         try:
             test_api = self.runner.apply()
+            self.config.hook.pytest_terraform_modify_state(tfstate=test_api)
             test_api.save(module_dir.join("tf_resources.json"))
             return test_api
         except Exception:
@@ -329,7 +340,12 @@ class FixtureDecoratorFactory(object):
         raise KeyError(name)
 
     def __call__(
-        self, terraform_dir, scope="function", replay=None, name=None, teardown=td.DEFAULT
+        self,
+        terraform_dir,
+        scope="function",
+        replay=None,
+        name=None,
+        teardown=td.DEFAULT,
     ):
         # We have to hook into where fixture discovery will find
         # our fixtures, the easiest option is to store on the module that
@@ -361,6 +377,7 @@ class FixtureDecoratorFactory(object):
             test_dir,
             replay,
             teardown,
+            PytestConfig.resolve(),
         )
         self._fixtures.append(tfix)
         marker = pytest.fixture(scope=scope, name=terraform_dir)

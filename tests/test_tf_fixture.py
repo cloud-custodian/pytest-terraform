@@ -48,6 +48,7 @@ def test_tf_teardown_register():
         test_dir="fakedir",
         replay=False,
         teardown=tf.td.ON,
+        pytest_config=MagicMock(),
     )
 
     fixture.runner = MagicMock()
@@ -69,6 +70,7 @@ def test_tf_teardown_exception():
         test_dir="fakedir",
         replay=False,
         teardown=tf.td.ON,
+        pytest_config=MagicMock(),
     )
 
     request = MagicMock()
@@ -89,6 +91,7 @@ def test_tf_teardown_register_ignore():
         test_dir="fakedir",
         replay=False,
         teardown=tf.td.IGNORE,
+        pytest_config=MagicMock(),
     )
 
     request = MagicMock()
@@ -110,6 +113,7 @@ def test_tf_skip_teardown_register():
         test_dir="fakedir",
         replay=False,
         teardown=tf.td.OFF,
+        pytest_config=MagicMock(),
     )
 
     fixture.runner = MagicMock()
@@ -118,6 +122,27 @@ def test_tf_skip_teardown_register():
     fixture.create(request, MagicMock())
 
     request.addfinalizer.assert_not_called()
+
+
+def test_tf_hook_modify_state():
+    pytest_config = MagicMock()
+    fixture = tf.TerraformFixture(
+        tf_bin="fakebin",
+        plugin_cache="fakecache",
+        scope="function",
+        tf_root_module="fakeroot",
+        test_dir="fakedir",
+        replay=False,
+        teardown=tf.td.DEFAULT,
+        pytest_config=pytest_config,
+    )
+
+    fixture.runner = MagicMock()
+    fixture.create(MagicMock(), MagicMock())
+
+    test_api = fixture.runner.apply.return_value
+    hook = pytest_config.hook.pytest_terraform_modify_state
+    hook.assert_called_with(tfstate=test_api)
 
 
 @patch.object(tf.TerraformFixture, "__call__")

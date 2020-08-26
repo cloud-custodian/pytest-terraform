@@ -16,7 +16,7 @@ import os
 from collections import defaultdict
 
 import pytest
-from pytest_terraform import tf, xdist
+from pytest_terraform import hooks, tf, xdist
 
 
 @pytest.hookimpl(trylast=True)
@@ -39,12 +39,19 @@ def pytest_configure(config):
             "specified with --tf-binary"
         )
 
+    tf.PytestConfig.value = config
+
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
         tf.terraform.scope_class_map = d = defaultdict(
             lambda: xdist.ScopedTerraformFixture
         )
         d["function"] = tf.TerraformFixture
+
+
+def pytest_addhooks(pluginmanager):
+    """ Register pytest_terraform hooks """
+    pluginmanager.add_hookspecs(hooks)
 
 
 def pytest_addoption(parser):
