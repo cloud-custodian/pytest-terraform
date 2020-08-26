@@ -167,41 +167,50 @@ class TerraformState(object):
         return default
 
     @classmethod
-    def load(cls, state_file):
+    def load(cls, state):
         resources = {}
         outputs = {}
-        with open(state_file) as fh:
-            data = json.load(fh)
-            if "pytest-terraform" in data:
-                return cls(data["resources"], data["outputs"])
-            for r in data.get("resources", ()):
-                rmap = resources.setdefault(r["type"], {})
-                rmap[r["name"]] = dict(r["instances"][0]["attributes"])
 
-            outputs = data.get("outputs", {})
-            for m in data.get("modules", ()):
-                for k, r in m.get("resources", {}).items():
-                    if k.startswith("data"):
-                        continue
-                    module, rname = k.split(".", 1)
-                    rmap = resources.setdefault(module, {})
-                    rattrs = {"id": r["primary"]["id"]}
-                    for kattr, vattr in r["primary"]["attributes"].items():
-                        if "name" in kattr and vattr != rattrs["id"]:
-                            rattrs[kattr] = vattr
-                    rmap[rname] = rattrs
+        if os.path.isfile(state):
+            with open(state) as fh:
+                data = json.load(fh)
+        else:
+            data = json.loads(state)
+
+        if "pytest-terraform" in data:
+            return cls(data["resources"], data["outputs"])
+        for r in data.get("resources", ()):
+            rmap = resources.setdefault(r["type"], {})
+            rmap[r["name"]] = dict(r["instances"][0]["attributes"])
+
+        outputs = data.get("outputs", {})
+        for m in data.get("modules", ()):
+            for k, r in m.get("resources", {}).items():
+                if k.startswith("data"):
+                    continue
+                module, rname = k.split(".", 1)
+                rmap = resources.setdefault(module, {})
+                rattrs = {"id": r["primary"]["id"]}
+                for kattr, vattr in r["primary"]["attributes"].items():
+                    if "name" in kattr and vattr != rattrs["id"]:
+                        rattrs[kattr] = vattr
+                rmap[rname] = rattrs
         return cls(resources, outputs)
 
-    def save(self, state_path):
+    def save(self, state_path=None):
+        state = {
+            "pytest-terraform": 1,
+            "outputs": self.outputs,
+            "resources": self.resources,
+        }
+
+        output = json.dumps(state, indent=4)
+
+        if not state_path:
+            return output
+
         with open(state_path, "w") as fh:
-            json.dump(
-                {
-                    "pytest-terraform": 1,
-                    "outputs": self.outputs,
-                    "resources": self.resources,
-                },
-                fh,
-            )
+            fh.write(output)
 
 
 class TerraformTestApi(TerraformState):

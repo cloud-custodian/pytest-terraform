@@ -57,6 +57,20 @@ def test_tf_resources():
     assert str(excinfo.value).splitlines()[0] == "Ambigious resource name rest_api"
 
 
+def test_tf_string_resources():
+    with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
+        burnify = f.read()
+
+    state = tf.TerraformState.load(burnify)
+    save_state = state.save()
+    reload = tf.TerraformState.load(save_state)
+
+    assert len(state.resources) == 9
+    assert len(reload.resources) == 9
+
+    assert save_state == reload.save()
+
+
 @pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")
 def test_tf_runner(testdir, tmpdir):
     # ** requires network access to install plugin **

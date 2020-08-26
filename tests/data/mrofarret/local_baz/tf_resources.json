@@ -1,1 +1,17 @@
-{"pytest-terraform": 1, "outputs": {}, "resources": {"local_file": {"baz": {"content": "baz!", "content_base64": null, "directory_permission": "0777", "file_permission": "0777", "filename": "./baz.txt", "id": "5fc5caaa8d04abb85be16b17953cd1a6e3ed549b", "sensitive_content": null}}}}
+{
+    "pytest-terraform": 1,
+    "outputs": {},
+    "resources": {
+        "local_file": {
+            "baz": {
+                "content": "baz!",
+                "content_base64": null,
+                "directory_permission": "0777",
+                "file_permission": "0777",
+                "filename": "./baz.txt",
+                "id": "5fc5caaa8d04abb85be16b17953cd1a6e3ed549b",
+                "sensitive_content": null
+            }
+        }
+    }
+}
