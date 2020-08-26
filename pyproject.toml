@@ -13,13 +13,13 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6.1"
-pytest = "^5.3.5"
+pytest = ">= 5.3.5"
 jmespath = "^0.10.0"
 portalocker = "^1.7.0"
 
 [tool.poetry.dev-dependencies]
 mkdocs = "^1.1"
-pytest-xdist = "^1.31.0"
+pytest-xdist = ">= 1.31.0"
 black = "^19.10b0"
 isort = "^4.3.21"
 flake8 = "^3.7.9"
@@ -29,6 +29,11 @@ pre-commit = "^2.3.0"
 
 [tool.poetry.plugins.pytest11]
 terraform = "pytest_terraform.plugin"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
+norecursedirs = ["data", "terraform"]
 
 [tool.isort]
 line_length = 90
