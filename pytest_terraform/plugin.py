@@ -21,15 +21,23 @@ from pytest_terraform import tf, xdist
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
-    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or tf.find_binary("terraform")
     tf.LazyPluginCacheDir.value = cache_dir = config.getoption("dest_tf_plugin")
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
 
-    tf.LazyReplay.value = config.getoption("dest_tf_replay")
     tf.LazyModuleDir.value = config.getoption("dest_tf_mod_dir") or config.getini(
         "terraform-mod-dir"
     )
+
+    if tf.LazyReplay.value is None:
+        tf.LazyReplay.value = config.getoption("dest_tf_replay")
+
+    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or tf.find_binary("terraform")
+    if tf.LazyTfBin.value is None and not tf.LazyReplay.value:
+        raise ValueError(
+            "pytest-terraform requires terraform binary on PATH or "
+            "specified with --tf-binary"
+        )
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
