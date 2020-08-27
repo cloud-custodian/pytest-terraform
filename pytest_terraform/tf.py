@@ -16,7 +16,7 @@ import json
 import os
 import subprocess
 import sys
-from collections import defaultdict
+from collections import UserString, defaultdict
 
 import jmespath
 import pytest
@@ -116,6 +116,34 @@ class TerraformRunner(object):
         run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
 
 
+class TerraformStateJson(UserString):
+    @classmethod
+    def from_dict(cls, state):
+        s = cls("")
+        s.update_dict(state)
+        return s
+
+    def update(self, state):
+        if not isinstance(state, str):
+            raise ValueError(f"{state} is not a string")
+
+        self.data = str(state)
+
+    def update_dict(self, state):
+        self.update(json.dumps(state, indent=4))
+
+    @property
+    def dict(self):
+        return json.loads(self.data)
+
+    @dict.setter
+    def dict(self, data):
+        try:
+            self.update_dict(data)
+        except (ValueError, TypeError):
+            raise ValueError("Not a serializable object")
+
+
 class TerraformState(object):
     """Abstraction over a terrafrom state file with helpers.
 
@@ -171,7 +199,9 @@ class TerraformState(object):
         resources = {}
         outputs = {}
 
-        if os.path.isfile(state):
+        if isinstance(state, TerraformStateJson):
+            data = state.dict
+        elif os.path.isfile(state):
             with open(state) as fh:
                 data = json.load(fh)
         else:
@@ -204,13 +234,13 @@ class TerraformState(object):
             "resources": self.resources,
         }
 
-        output = json.dumps(state, indent=4)
+        output = TerraformStateJson.from_dict(state)
 
         if not state_path:
             return output
 
         with open(state_path, "w") as fh:
-            fh.write(output)
+            fh.write(str(output))
 
 
 class TerraformTestApi(TerraformState):
@@ -313,7 +343,9 @@ class TerraformFixture(object):
             request.addfinalizer(self.tear_down)
         try:
             test_api = self.runner.apply()
-            self.config.hook.pytest_terraform_modify_state(tfstate=test_api)
+            tfstatejson = test_api.save()
+            self.config.hook.pytest_terraform_modify_state(tfstate=tfstatejson)
+            test_api.load(tfstatejson)
             test_api.save(module_dir.join("tf_resources.json"))
             return test_api
         except Exception:

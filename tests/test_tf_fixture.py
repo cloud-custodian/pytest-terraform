@@ -140,9 +140,9 @@ def test_tf_hook_modify_state():
     fixture.runner = MagicMock()
     fixture.create(MagicMock(), MagicMock())
 
-    test_api = fixture.runner.apply.return_value
+    tfstate_json = fixture.runner.apply.return_value.save.return_value
     hook = pytest_config.hook.pytest_terraform_modify_state
-    hook.assert_called_with(tfstate=test_api)
+    hook.assert_called_with(tfstate=tfstate_json)
 
 
 @patch.object(tf.TerraformFixture, "__call__")
