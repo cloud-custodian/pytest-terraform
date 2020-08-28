@@ -1,1 +1,17 @@
-{"pytest-terraform": 1, "outputs": {}, "resources": {"local_file": {"bar": {"content": "bar!", "content_base64": null, "directory_permission": "0777", "file_permission": "0777", "filename": "./bar.txt", "id": "3811e1a645e5371113584e6d18ff4843378ae590", "sensitive_content": null}}}}
+{
+    "pytest-terraform": 1,
+    "outputs": {},
+    "resources": {
+        "local_file": {
+            "bar": {
+                "content": "bar!",
+                "content_base64": null,
+                "directory_permission": "0777",
+                "file_permission": "0777",
+                "filename": "./bar.txt",
+                "id": "3811e1a645e5371113584e6d18ff4843378ae590",
+                "sensitive_content": null
+            }
+        }
+    }
+}

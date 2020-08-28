@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import os
 from pathlib import Path
 
@@ -55,6 +56,89 @@ def test_tf_resources():
         state.get("rest_api")
 
     assert str(excinfo.value).splitlines()[0] == "Ambigious resource name rest_api"
+
+
+def test_tf_string_resources():
+    with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
+        burnify = f.read()
+
+    state = tf.TerraformState.load(burnify)
+    save_state = str(state.save())
+    reload = tf.TerraformState.load(save_state)
+
+    assert len(state.resources) == 9
+    assert len(reload.resources) == 9
+
+    assert save_state == reload.save()
+
+
+def test_tf_statejson_resources():
+    with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
+        burnify = f.read()
+
+    state = tf.TerraformState.load(burnify)
+    save_state = state.save()
+    reload = tf.TerraformState.load(save_state)
+
+    assert len(state.resources) == 9
+    assert len(reload.resources) == 9
+
+    assert save_state == reload.save()
+
+
+def test_tf_statejson_from_dict():
+    obj = {
+        "test": "foo",
+        "nested": {"bar": "baz"},
+    }
+
+    statejson = tf.TerraformStateJson.from_dict(obj)
+    assert str(statejson) == json.dumps(obj, indent=4)
+    assert statejson.dict == obj
+
+
+def test_tf_statejson_bad_dict():
+    obj = {
+        "test": "foo",
+        "nested": {"bar": "baz"},
+        "embed": tf.PlaceHolderValue("test"),
+    }
+
+    statejson = tf.TerraformStateJson("")
+    with pytest.raises(ValueError):
+        statejson.dict = obj
+
+
+def test_tf_statejson_update():
+    newobj = {
+        "differet": True,
+    }
+
+    newstr = json.dumps(newobj)
+
+    statejson = tf.TerraformStateJson("")
+    statejson.update(newstr)
+
+    assert str(statejson) == newstr
+
+
+def test_tf_statejson_update_dict():
+    newobj = {
+        "differet": True,
+    }
+
+    statejson = tf.TerraformStateJson("")
+    statejson.update_dict(newobj)
+
+    assert statejson.dict == newobj
+
+
+def test_tf_statejson_update_bad():
+
+    statejson = tf.TerraformStateJson("hello")
+
+    with pytest.raises(ValueError):
+        statejson.update({"hello": "world"})
 
 
 @pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")

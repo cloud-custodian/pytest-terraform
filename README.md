@@ -119,6 +119,37 @@ This should generally only be used in very specific situations and is considered
 
 There is a special `pytest_terraform.teardown.DEFAULT` which is what the `teardown` parameter actually defaults to.
 
+## Hooks
+
+pytest_terraform provides hooks via the pytest hook implementation.
+Hooks should be added in the `conftest.py` file.
+
+### `pytest_terraform_modify_state`
+
+This hook is executed after state has been captured from terraform apply and before writing the `tf_resources.json` file.
+The state is passed as the kwarg `tfstate` which is a `TerraformStateJson` UserString class with the following methods and properties:
+
+- `TerraformStateJson.dict` - The deserialized state as a dict
+- `TerraformStateJson.update(state: str)` - Replace the serialized state with a new state string
+- `TerraformStateJson.update_dict(state: dict)` - Replace the serialized state from a dictionary
+
+#### Example
+
+```python
+def pytest_terraform_modify_state(tfstate):
+    print(str(tfstate))
+```
+
+#### Example AWS Account scrub
+
+```python
+import re
+
+def pytest_terraform_modify_state(tfstate):
+    """ Replace potential AWS account numbers with 'REDACTED' """
+    tfstate.update(re.sub(r'([0-9]+){12}', 'REDACTED', str(tfstate)))
+```
+
 ## Flight Recording
 
 The usage/philosophy of this plugin is based on using flight recording
