@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pytest-terraform"
-version = "0.3.1"
+version = "0.3.2"
 description = "A pytest plugin for using terraform fixtures"
 authors = ["Kapil Thangavelu <kapilt@gmail.com>"]
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ classifiers=[
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">= 3.6"
+python = "^3.6"
 pytest = ">= 5.3.5"
 jmespath = "^0.10.0"
 portalocker = "^1.7.0"
