@@ -63,9 +63,9 @@ def test_tf_string_resources():
     with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
         burnify = f.read()
 
-    state = tf.TerraformState.from_state(burnify)
+    state = tf.TerraformState.from_string(burnify)
     save_state = str(state.save())
-    reload = tf.TerraformState.from_state(save_state)
+    reload = tf.TerraformState.from_string(save_state)
 
     assert len(state.resources) == 9
     assert len(reload.resources) == 9
@@ -77,9 +77,9 @@ def test_tf_statejson_resources():
     with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
         burnify = f.read()
 
-    state = tf.TerraformState.from_state(burnify)
+    state = tf.TerraformState.from_string(burnify)
     save_state = state.save()
-    reload = tf.TerraformState.from_state(save_state)
+    reload = tf.TerraformState.from_string(save_state)
 
     assert len(state.resources) == 9
     assert len(reload.resources) == 9

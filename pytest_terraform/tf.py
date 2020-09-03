@@ -17,6 +17,7 @@ import os
 import subprocess
 import sys
 from collections import UserString, defaultdict
+from typing import Any, Dict, Optional, Tuple, Union
 
 import jmespath
 import pytest
@@ -114,26 +115,31 @@ class TerraformRunner(object):
 
 class TerraformStateJson(UserString):
     @classmethod
-    def from_dict(cls, state):
+    def from_dict(cls, state: Dict[str, Any]):
+        """create TerraformStateJson from dictionary"""
         s = cls("")
         s.update_dict(state)
         return s
 
-    def update(self, state):
+    def update(self, state: str):
+        """update TerraformStateJson object with new data"""
         if not isinstance(state, str):
             raise ValueError(f"{state} is not a string")
 
         self.data = str(state)
 
-    def update_dict(self, state):
+    def update_dict(self, state: Dict[str, Any]):
+        """update TerraformStateJson from a dict"""
         self.update(json.dumps(state, indent=4))
 
     @property
     def dict(self):
+        """return the TerraformStateJson as a dict"""
         return json.loads(self.data)
 
     @dict.setter
-    def dict(self, data):
+    def dict(self, data: Dict[str, Any]):
+        """update TerraformStateJson from a dict"""
         try:
             self.update_dict(data)
         except (ValueError, TypeError):
@@ -191,27 +197,47 @@ class TerraformState(object):
         return default
 
     @classmethod
-    def from_file(cls, path):
+    def from_file(cls, path: str):
+        """create TerraformState from a file
+
+        File can either be a Terraform Plan state, or a recorded
+        pytest-terraform state
+        """
         if not os.path.isfile(path):
             raise InvalidState("{} could not be located".format(path))
 
         with open(path) as fh:
             state = fh.read()
 
-        return cls.from_state(state)
+        return cls.from_string(state)
 
     @classmethod
-    def from_state(cls, state):
+    def from_string(cls, state: Union[TerraformStateJson, str]):
+        """create TerraformState from string
+
+        State string can be a bytestring or a TerraformStateJson
+        string object
+        """
         resources, outputs = cls.parse_state(state)
         return cls(resources, outputs)
 
-    def update(self, state):
+    def update(self, state: Union[TerraformStateJson, str]):
+        """update TerraformState values"""
         resources, outputs = self.parse_state(state)
         self.resources = resources
         self.outputs = outputs
 
     @staticmethod
-    def parse_state(state):
+    def parse_state(
+        state: Union[TerraformStateJson, str]
+    ) -> Tuple[Dict[str, any], Dict[str, Any]]:
+        """extract resources and outputs from state
+
+        where state is one of the following:
+        * Terraform state output as a string
+        * Recorded pytest-terraform state
+        * TerraformStateJson object
+        """
         if isinstance(state, TerraformStateJson):
             data = state.dict
         else:
@@ -242,7 +268,8 @@ class TerraformState(object):
 
         return (resources, outputs)
 
-    def save(self, state_path=None):
+    def save(self, state_path: Optional[str] = None) -> Optional[TerraformStateJson]:
+        """export state as a string or to a file"""
         state = {
             "pytest-terraform": 1,
             "outputs": self.outputs,
