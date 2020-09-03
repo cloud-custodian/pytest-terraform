@@ -205,7 +205,7 @@ class TerraformState(object):
         resources, outputs = cls.parse_state(state)
         return cls(resources, outputs)
 
-    def load(self, state):
+    def update(self, state):
         resources, outputs = self.parse_state(state)
         self.resources = resources
         self.outputs = outputs
@@ -362,7 +362,7 @@ class TerraformFixture(object):
             test_api = self.runner.apply()
             tfstatejson = test_api.save()
             self.config.hook.pytest_terraform_modify_state(tfstate=tfstatejson)
-            test_api.load(tfstatejson)
+            test_api.update(tfstatejson)
             test_api.save(module_dir.join("tf_resources.json"))
             return test_api
         except Exception:
