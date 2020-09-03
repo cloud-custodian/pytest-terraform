@@ -22,7 +22,7 @@ import jmespath
 import pytest
 from py.path import local
 
-from .exceptions import TerraformCommandFailed
+from .exceptions import InvalidState, ModuleNotFound, TerraformCommandFailed
 from .options import teardown as td
 
 
@@ -32,10 +32,6 @@ def find_binary(bin_name):
         candidate = os.path.join(p, bin_name)
         if os.path.exists(candidate):
             return candidate
-
-
-class ModuleNotFound(ValueError):
-    """module not found"""
 
 
 class TerraformRunner(object):
@@ -83,7 +79,7 @@ class TerraformRunner(object):
         elif plan:
             apply_args = self._get_cmd_args("apply", plan="")
         self._run_cmd(apply_args)
-        return TerraformState.load(self.state_path)
+        return TerraformState.from_file(self.state_path)
 
     def plan(self, output=""):
         output = output and "-out=%s" % output or ""
@@ -195,20 +191,38 @@ class TerraformState(object):
         return default
 
     @classmethod
-    def load(cls, state):
-        resources = {}
-        outputs = {}
+    def from_file(cls, path):
+        if not os.path.isfile(path):
+            raise InvalidState("{} could not be located".format(path))
 
+        with open(path) as fh:
+            state = fh.read()
+
+        return cls.from_state(state)
+
+    @classmethod
+    def from_state(cls, state):
+        resources, outputs = cls.parse_state(state)
+        return cls(resources, outputs)
+
+    def load(self, state):
+        resources, outputs = self.parse_state(state)
+        self.resources = resources
+        self.outputs = outputs
+
+    @staticmethod
+    def parse_state(state):
         if isinstance(state, TerraformStateJson):
             data = state.dict
-        elif os.path.isfile(state):
-            with open(state) as fh:
-                data = json.load(fh)
         else:
             data = json.loads(state)
 
         if "pytest-terraform" in data:
-            return cls(data["resources"], data["outputs"])
+            return (data["resources"], data["outputs"])
+
+        resources = {}
+        outputs = {}
+
         for r in data.get("resources", ()):
             rmap = resources.setdefault(r["type"], {})
             rmap[r["name"]] = dict(r["instances"][0]["attributes"])
@@ -225,7 +239,8 @@ class TerraformState(object):
                     if "name" in kattr and vattr != rattrs["id"]:
                         rattrs[kattr] = vattr
                 rmap[rname] = rattrs
-        return cls(resources, outputs)
+
+        return (resources, outputs)
 
     def save(self, state_path=None):
         state = {
@@ -331,7 +346,9 @@ class TerraformFixture(object):
                 raise ValueError(
                     "Replay resources don't exist for %s" % self.tf_root_module
                 )
-            return TerraformTestApi.load(os.path.join(module_dir, "tf_resources.json"))
+            return TerraformTestApi.from_file(
+                os.path.join(module_dir, "tf_resources.json")
+            )
         work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join("work")
         self.runner = self.get_runner(module_dir, work_dir)
         return self.create(request, module_dir)
