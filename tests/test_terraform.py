@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 from pytest_terraform import tf
+from pytest_terraform.exceptions import InvalidState
 
 
 def test_frame_walk():
@@ -42,7 +43,7 @@ def test_fixture_factory():
 
 
 def test_tf_resources():
-    state = tf.TerraformState.load(
+    state = tf.TerraformState.from_file(
         os.path.join(os.path.dirname(__file__), "burnify.tfstate")
     )
 
@@ -62,9 +63,9 @@ def test_tf_string_resources():
     with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
         burnify = f.read()
 
-    state = tf.TerraformState.load(burnify)
+    state = tf.TerraformState.from_string(burnify)
     save_state = str(state.save())
-    reload = tf.TerraformState.load(save_state)
+    reload = tf.TerraformState.from_string(save_state)
 
     assert len(state.resources) == 9
     assert len(reload.resources) == 9
@@ -76,14 +77,19 @@ def test_tf_statejson_resources():
     with open(os.path.join(os.path.dirname(__file__), "burnify.tfstate")) as f:
         burnify = f.read()
 
-    state = tf.TerraformState.load(burnify)
+    state = tf.TerraformState.from_string(burnify)
     save_state = state.save()
-    reload = tf.TerraformState.load(save_state)
+    reload = tf.TerraformState.from_string(save_state)
 
     assert len(state.resources) == 9
     assert len(reload.resources) == 9
 
     assert save_state == reload.save()
+
+
+def test_tf_state_bad_file():
+    with pytest.raises(InvalidState):
+        tf.TerraformState.from_file("/not-exists1")
 
 
 def test_tf_statejson_from_dict():

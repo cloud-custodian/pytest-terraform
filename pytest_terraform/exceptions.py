@@ -12,3 +12,11 @@ class InvalidOption(PytestTerraformError):
 
 class InvalidTeardownMode(InvalidOption):
     """Invalid Teardown Option Error"""
+
+
+class InvalidState(PytestTerraformError):
+    """Failure to load / parse state"""
+
+
+class ModuleNotFound(ValueError):
+    """module not found"""
