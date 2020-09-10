@@ -471,6 +471,7 @@ class FixtureDecoratorFactory(object):
 
     @staticmethod
     def nonce_decorator(func):
+        pytest.mark.terraform(func)
         return func
 
 
