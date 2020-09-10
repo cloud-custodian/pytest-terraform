@@ -155,7 +155,8 @@ Hooks should be added in the `conftest.py` file.
 
 ### `pytest_terraform_modify_state`
 
-This hook is executed after state has been captured from terraform apply and before writing the `tf_resources.json` file.
+This hook is executed after state has been captured from terraform apply and before writing to disk.
+This hook does not modify state that's passed to the function under test.
 The state is passed as the kwarg `tfstate` which is a `TerraformStateJson` UserString class with the following methods and properties:
 
 - `TerraformStateJson.dict` - The deserialized state as a dict
