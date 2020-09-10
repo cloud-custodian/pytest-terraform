@@ -80,6 +80,19 @@ def test_sqs_dlq(aws_sqs):
 implementation detail of terraform, not per se a stable public interface
 across versions.
 
+## Marks
+
+All tests using terraform fixtures have a `terraform` mark applied so
+they can be run/selected via the command line ie.
+
+```shell
+pytest -k terraform tests/
+```
+
+to run all terraform tests only. See pytest mark documentation for
+additional details, https://docs.pytest.org/en/stable/example/markers.html#mark-examples
+
+
 ## Options
 
 You can provide the path to the terraform binary else its auto discovered

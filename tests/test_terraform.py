@@ -253,7 +253,7 @@ def test_plugins_ini_setting_terraform_mod_dir(testdir):
     """
     )
 
-    result = testdir.runpytest("-v", "-s")
+    result = testdir.runpytest("-v", "-s", "-k", "terraform")
 
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines(["*::test_local_baz PASSED*"])
