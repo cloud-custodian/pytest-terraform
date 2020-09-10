@@ -412,6 +412,11 @@ class FixtureDecoratorFactory(object):
 
     scope_class_map = defaultdict(lambda: TerraformFixture)
 
+    # Make accessing teardown options easier for users
+    TEARDOWN_IGNORE = td.IGNORE
+    TEARDOWN_OFF = td.OFF
+    TEARDOWN_ON = td.ON
+
     def __init__(self):
         self._fixtures = []
 

@@ -132,6 +132,22 @@ This should generally only be used in very specific situations and is considered
 
 There is a special `pytest_terraform.teardown.DEFAULT` which is what the `teardown` parameter actually defaults to.
 
+Teardown options are available, for convenience, on the terraform decorator.
+For example, set teardown to ignore:
+
+```python
+from pytest_terraform import terraform
+
+
+@terraform('aws_sqs', teardown=terraform.TEARDOWN_IGNORE)
+def test_sqs(aws_sqs):
+    assert aws_sqs["aws_sqs_queue.test_queue.tags"] == {
+        "Environment": "production"
+    }
+   queue_url = aws_sqs['test_queue.queue_url']
+   print(queue_url)
+```
+
 ## Hooks
 
 pytest_terraform provides hooks via the pytest hook implementation.
