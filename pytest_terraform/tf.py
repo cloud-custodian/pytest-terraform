@@ -386,14 +386,14 @@ class TerraformFixture(object):
         if self.teardown_config != td.OFF:
             request.addfinalizer(self.tear_down)
         try:
-            terraform_state = self.runner.apply()
-            tfstatejson = terraform_state.save()
-            test_api = TerraformTestApi.from_string(tfstatejson)
+            state = self.runner.apply()
+            statejson = state.save()
+            test_api = TerraformTestApi.from_string(statejson)
 
-            self.config.hook.pytest_terraform_modify_state(tfstate=tfstatejson)
+            self.config.hook.pytest_terraform_modify_state(tfstate=statejson)
 
-            terraform_state.update(tfstatejson)
-            terraform_state.save(module_dir.join("tf_resources.json"))
+            state.update(statejson)
+            state.save(module_dir.join("tf_resources.json"))
 
             return test_api
         except Exception:
