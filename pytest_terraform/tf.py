@@ -268,16 +268,21 @@ class TerraformState(object):
 
         return (resources, outputs)
 
-    def save(self, state_path: Optional[str] = None) -> Optional[TerraformStateJson]:
-        """export state as a string or to a file"""
+    def export(self):
+        """export state as a TerraformStateJson UserString"""
+
         state = {
             "pytest-terraform": 1,
             "outputs": self.outputs,
             "resources": self.resources,
         }
 
-        output = TerraformStateJson.from_dict(state)
+        return TerraformStateJson.from_dict(state)
 
+    def save(self, state_path: Optional[str] = None) -> Optional[TerraformStateJson]:
+        """export state to a file"""
+
+        output = self.export()
         if not state_path:
             return output
 
@@ -387,7 +392,7 @@ class TerraformFixture(object):
             request.addfinalizer(self.tear_down)
         try:
             state = self.runner.apply()
-            statejson = state.save()
+            statejson = state.export()
             test_api = TerraformTestApi.from_string(statejson)
 
             self.config.hook.pytest_terraform_modify_state(tfstate=statejson)
