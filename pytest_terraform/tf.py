@@ -392,12 +392,12 @@ class TerraformFixture(object):
             request.addfinalizer(self.tear_down)
         try:
             state = self.runner.apply()
-            statejson = state.export()
-            test_api = TerraformTestApi.from_string(statejson)
+            state_json = state.export()
+            test_api = TerraformTestApi.from_string(state_json)
 
-            self.config.hook.pytest_terraform_modify_state(tfstate=statejson)
+            self.config.hook.pytest_terraform_modify_state(tfstate=state_json)
 
-            state.update(statejson)
+            state.update(state_json)
             state.save(module_dir.join("tf_resources.json"))
 
             return test_api
