@@ -260,3 +260,45 @@ def test_plugins_ini_setting_terraform_mod_dir(testdir):
 
     # make sure that that we get a '0' exit code for the testsuite
     assert result.ret == 0
+
+
+@pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")
+def test_hook_modify_state_copy(testdir):
+    """Test that modify_state hook does not modify state
+    for function under test
+    """
+
+    mod_dir = Path(__file__).parent / "terraform"
+    testdir.makeini(
+        f"""
+        [pytest]
+        terraform-mod-dir = {mod_dir}
+    """
+    )
+
+    testdir.makeconftest(
+        """
+        def pytest_terraform_modify_state(tfstate):
+            tfstate.update(str(tfstate).replace('buz!', 'fiz!'))
+    """
+    )
+
+    testdir.makepyfile(
+        """
+        import pytest
+        from pytest_terraform import terraform
+
+        @terraform("local_buz")
+        def test_local_buz(local_buz):
+            assert local_buz['local_file.buz.content'] == 'buz!'
+            return
+    """
+    )
+
+    result = testdir.runpytest("-v", "-s")
+
+    result.stdout.fnmatch_lines(["*::test_local_buz PASSED*"])
+    assert result.ret == 0
+
+    state = tf.TerraformState.from_file(mod_dir / "local_buz" / "tf_resources.json")
+    assert state["local_file.buz.content"] == "fiz!"

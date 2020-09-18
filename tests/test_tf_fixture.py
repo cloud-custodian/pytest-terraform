@@ -52,6 +52,7 @@ def test_tf_teardown_register():
     )
 
     fixture.runner = MagicMock()
+    fixture.runner.apply.return_value = tf.TerraformState({}, {})
     request = MagicMock()
 
     fixture.create(request, MagicMock())
@@ -75,6 +76,7 @@ def test_tf_teardown_exception():
 
     request = MagicMock()
     fixture.runner = MagicMock()
+    fixture.runner.apply.return_value = tf.TerraformState({}, {})
     fixture.runner.destroy.side_effect = [subprocess.CalledProcessError(99, "test")]
 
     fixture.create(request, MagicMock())
@@ -96,6 +98,7 @@ def test_tf_teardown_register_ignore():
 
     request = MagicMock()
     fixture.runner = MagicMock()
+    fixture.runner.apply.return_value = tf.TerraformState({}, {})
     fixture.runner.destroy.side_effect = [subprocess.CalledProcessError(99, "test")]
 
     fixture.create(request, MagicMock())
@@ -116,8 +119,9 @@ def test_tf_skip_teardown_register():
         pytest_config=MagicMock(),
     )
 
-    fixture.runner = MagicMock()
     request = MagicMock()
+    fixture.runner = MagicMock()
+    fixture.runner.apply.return_value = tf.TerraformState({}, {})
 
     fixture.create(request, MagicMock())
 
@@ -137,10 +141,12 @@ def test_tf_hook_modify_state():
         pytest_config=pytest_config,
     )
 
+    state = tf.TerraformState({"one": 2}, {"three": 4})
     fixture.runner = MagicMock()
+    fixture.runner.apply.return_value = state
     fixture.create(MagicMock(), MagicMock())
 
-    tfstate_json = fixture.runner.apply.return_value.save.return_value
+    tfstate_json = state.save()
     hook = pytest_config.hook.pytest_terraform_modify_state
     hook.assert_called_with(tfstate=tfstate_json)
 
