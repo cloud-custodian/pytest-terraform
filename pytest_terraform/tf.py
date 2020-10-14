@@ -370,7 +370,7 @@ class TerraformFixture(object):
             tf_bin=LazyTfBin.resolve(),
         )
 
-    def __call__(self, request, tmpdir_factory):
+    def __call__(self, request, tmpdir_factory, worker_id):
         module_dir = self.resolve_module_dir()
         if self.replay:
             replay_resources = os.path.join(module_dir, "tf_resources.json")
