@@ -110,7 +110,12 @@ class TerraformRunner(object):
         cwd = self.module_dir or self.work_dir
         print("run cmd", args, file=sys.stderr)
         run_cmd = self.debug and subprocess.check_call or subprocess.check_output
-        run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
+        try:
+            run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
+        except subprocess.CalledProcessError as e:
+            raise TerraformCommandFailed(
+                "`{cmd}` failed: {output}".format(cmd=e.cmd, output=e.output)
+            )
 
 
 class TerraformStateJson(UserString):
