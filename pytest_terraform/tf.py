@@ -109,7 +109,7 @@ class TerraformRunner(object):
             env["TF_DATA_DIR"] = self.work_dir
         cwd = self.module_dir or self.work_dir
         print("run cmd", args, file=sys.stderr)
-        run_cmd = self.debug and subprocess.check_call or subprocess.check_output
+        run_cmd = subprocess.check_call
         run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
 
 
