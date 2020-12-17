@@ -59,7 +59,7 @@ def test_sqs_deliver(aws_sqs):
    # it can be reused in the same module by name, with provisioning
    # respecting scopes.
    #
-   boto3.Session().client('sqs')
+   sqs = Session().client('sqs')
    sqs.send_message(
        QueueUrl=aws_sqs['test_queue.queue_url'],
        MessageBody=b"123")
