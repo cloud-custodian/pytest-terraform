@@ -13,7 +13,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6"
-pytest = "~6.0.0"
+pytest = "^6.0"
 jmespath = "^0.10.0"
 portalocker = "^1.7.0"
 pytest-xdist = ">= 1.31.0"
