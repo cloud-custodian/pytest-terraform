@@ -27,14 +27,6 @@ from .exceptions import InvalidState, ModuleNotFound, TerraformCommandFailed
 from .options import teardown as td
 
 
-def find_binary(bin_name):
-    parts = os.environ["PATH"].split(":")
-    for p in parts:
-        candidate = os.path.join(p, bin_name)
-        if os.path.exists(candidate):
-            return candidate
-
-
 class TerraformRunner(object):
 
     command_templates = {
@@ -416,8 +408,7 @@ class TerraformFixture(object):
 
 
 class FixtureDecoratorFactory(object):
-    """Generate fixture decorators on the fly.
-    """
+    """Generate fixture decorators on the fly."""
 
     scope_class_map = defaultdict(lambda: TerraformFixture)
 

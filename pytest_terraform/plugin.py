@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os
+import shutil
 from collections import defaultdict
 
 import pytest
@@ -34,7 +35,7 @@ def pytest_configure(config):
     if tf.LazyReplay.value is None:
         tf.LazyReplay.value = config.getoption("dest_tf_replay")
 
-    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or tf.find_binary("terraform")
+    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or shutil.which("terraform")
     if tf.LazyTfBin.value is None and not tf.LazyReplay.value:
         raise ValueError(
             "pytest-terraform requires terraform binary on PATH or "

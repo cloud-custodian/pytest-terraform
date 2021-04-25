@@ -10,7 +10,8 @@
                 "file_permission": "0777",
                 "filename": "./baz.txt",
                 "id": "5fc5caaa8d04abb85be16b17953cd1a6e3ed549b",
-                "sensitive_content": null
+                "sensitive_content": null,
+                "source": null
             }
         }
     }

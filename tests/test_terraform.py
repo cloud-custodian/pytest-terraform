@@ -193,7 +193,9 @@ def xtest_bar_fixture(testdir):
 
 
 def test_help_message(testdir):
-    result = testdir.runpytest("--help",)
+    result = testdir.runpytest(
+        "--help",
+    )
     # fnmatch_lines does an assertion internally
     result.stdout.fnmatch_lines(["terraform:", ("*--tf-binary=DEST_TF_BINARY*")])
 
