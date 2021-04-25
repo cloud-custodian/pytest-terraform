@@ -10,7 +10,8 @@
                 "file_permission": "0777",
                 "filename": "./buz.txt",
                 "id": "1eb8252c1ec503dce3b41735251e12bdeadf1493",
-                "sensitive_content": null
+                "sensitive_content": null,
+                "source": null
             }
         }
     }

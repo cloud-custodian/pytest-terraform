@@ -190,14 +190,24 @@ subsequently replayed for fast test execution. Beyond the fidelity
 offered, this also enables these tests to be executed/re-recorded against
 live infrastructure for additional functional/release testing.
 
+https://cloudcustodian.io/docs/developer/tests.html#creating-cloud-resources-with-terraform
+
 ### Replay Support
 
 By default fixtures will save a `tf_resources.json` back to the module
 directory, that will be used when in replay mode.
 
+Replay can be configured by passing --tf-replay on the cli or via pytest config file.
+
 ### Recording
 
-TODO ~
+Passing the fixture parameter `replay` can control the replay behavior on an individual
+test. The default is to operate in recording mode.
+
+@terraform('file_example', replay=False)
+def test_file_example(file_example):
+    assert file_example['local_file.bar.content'] == 'bar!'
+
 
 ## XDist Compatibility
 
