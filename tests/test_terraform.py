@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import shutil
 from pathlib import Path
 
 import pytest
@@ -147,7 +148,7 @@ def test_tf_statejson_update_bad():
         statejson.update({"hello": "world"})
 
 
-@pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")
+@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
 def test_tf_runner(testdir, tmpdir):
     # ** requires network access to install plugin **
     with open(tmpdir.join("resources.tf"), "w") as fh:
@@ -160,7 +161,7 @@ resource "local_file" "foo" {
 """
         )
 
-    trunner = tf.TerraformRunner(tmpdir.strpath, tf_bin=tf.find_binary("terraform"))
+    trunner = tf.TerraformRunner(tmpdir.strpath, tf_bin=shutil.which("terraform"))
     trunner.init()
     state = trunner.apply()
     assert state.get("foo")["content"] == "foo!"
@@ -231,7 +232,7 @@ def test_plugins_ini_setting(testdir):
     assert result.ret == 0
 
 
-@pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")
+@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
 def test_plugins_ini_setting_terraform_mod_dir(testdir):
     mod_dir = Path(__file__).parent / "data" / "mrofarret"
     testdir.makeini(
@@ -262,7 +263,7 @@ def test_plugins_ini_setting_terraform_mod_dir(testdir):
     assert result.ret == 0
 
 
-@pytest.mark.skipif(not tf.find_binary("terraform"), reason="Terraform binary missing")
+@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
 def test_hook_modify_state_copy(testdir):
     """Test that modify_state hook does not modify state
     for function under test
