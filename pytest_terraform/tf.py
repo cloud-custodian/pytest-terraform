@@ -102,7 +102,7 @@ class TerraformRunner(object):
         cwd = self.module_dir or self.work_dir
         print("run cmd", args, file=sys.stderr)
         run_cmd = subprocess.check_call
-        run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
+        return run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
 
 
 class TerraformStateJson(UserString):
@@ -152,9 +152,15 @@ class TerraformState(object):
     attributes which contain the key 'name' will also be present.
     """
 
-    def __init__(self, resources, outputs):
+    def __init__(self, resources, outputs, runner=None):
+        self._runner = runner
         self.outputs = outputs
         self.resources = resources
+
+    @property
+    def work_dir(self):
+        if self._runner:
+            return self._runner.work_dir
 
     def __getitem__(self, k):
         v = self.get(k)
@@ -204,14 +210,14 @@ class TerraformState(object):
         return cls.from_string(state)
 
     @classmethod
-    def from_string(cls, state: Union[TerraformStateJson, str]):
+    def from_string(cls, state: Union[TerraformStateJson, str], runner=None):
         """create TerraformState from string
 
         State string can be a bytestring or a TerraformStateJson
         string object
         """
         resources, outputs = cls.parse_state(state)
-        return cls(resources, outputs)
+        return cls(resources, outputs, runner)
 
     def update(self, state: Union[TerraformStateJson, str]):
         """update TerraformState values"""
@@ -385,7 +391,7 @@ class TerraformFixture(object):
         try:
             state = self.runner.apply()
             state_json = state.export()
-            test_api = TerraformTestApi.from_string(state_json)
+            test_api = TerraformTestApi.from_string(state_json, self.runner)
 
             self.config.hook.pytest_terraform_modify_state(tfstate=state_json)
 
