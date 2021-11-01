@@ -72,7 +72,7 @@ class TerraformRunner(object):
         elif plan:
             apply_args = self._get_cmd_args("apply", plan="")
         self._run_cmd(apply_args)
-        return TerraformState.from_file(self.state_path)
+        return TerraformState.from_file(self.state_path, self)
 
     def plan(self, output=""):
         output = output and "-out=%s" % output or ""
@@ -195,7 +195,7 @@ class TerraformState(object):
         return default
 
     @classmethod
-    def from_file(cls, path: str):
+    def from_file(cls, path: str, runner=None):
         """create TerraformState from a file
 
         File can either be a Terraform Plan state, or a recorded
@@ -207,7 +207,7 @@ class TerraformState(object):
         with open(path) as fh:
             state = fh.read()
 
-        return cls.from_string(state)
+        return cls.from_string(state, runner)
 
     @classmethod
     def from_string(cls, state: Union[TerraformStateJson, str], runner=None):
