@@ -168,6 +168,8 @@ resource "local_file" "foo" {
     with open(tmpdir.join("foo.bar")) as fh:
         assert fh.read() == "foo!"
 
+    assert state.work_dir is not None
+    assert isinstance(state.terraform.show(), dict)
     trunner.destroy()
     assert False is tmpdir.join("foo.bar").exists()
 

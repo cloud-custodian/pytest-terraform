@@ -24,9 +24,10 @@ from pytest_terraform import hooks, tf, xdist
 def pytest_configure(config):
     config.addinivalue_line("markers", "terraform: tests using terraform fixtures")
 
-    tf.LazyPluginCacheDir.value = cache_dir = config.getoption("dest_tf_plugin")
+    cache_dir = config.getoption("dest_tf_plugin")
     if not os.path.exists(cache_dir):
         os.mkdir(cache_dir)
+    tf.LazyPluginCacheDir.value = os.path.abspath(cache_dir)
 
     tf.LazyModuleDir.value = config.getoption("dest_tf_mod_dir") or config.getini(
         "terraform-mod-dir"

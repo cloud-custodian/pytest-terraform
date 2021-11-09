@@ -34,6 +34,7 @@ class TerraformRunner(object):
         "apply": "apply {input} {color} {state} {approve} {plan}",
         "plan": "plan {input} {color} {state} {output}",
         "destroy": "destroy {input} {color} {state} {approve}",
+        "show": "show {color} -json {state_path}",
     }
 
     template_defaults = {
@@ -72,7 +73,7 @@ class TerraformRunner(object):
         elif plan:
             apply_args = self._get_cmd_args("apply", plan="")
         self._run_cmd(apply_args)
-        return TerraformState.from_file(self.state_path)
+        return TerraformState.from_file(self.state_path, self)
 
     def plan(self, output=""):
         output = output and "-out=%s" % output or ""
@@ -84,6 +85,13 @@ class TerraformRunner(object):
     def destroy(self):
         self._run_cmd(self._get_cmd_args("destroy"))
 
+    def show(self):
+        return json.loads(
+            self._run_cmd(
+                self._get_cmd_args("show", state_path=self.state_path), output=True
+            ).decode("utf8")
+        )
+
     def _get_cmd_args(self, cmd_name, tf_bin=None, env=None, **kw):
         tf_bin = tf_bin and tf_bin or self.tf_bin
         kw.update(self.template_defaults)
@@ -92,17 +100,21 @@ class TerraformRunner(object):
             filter(None, self.command_templates[cmd_name].format(**kw).split(" "))
         )
 
-    def _run_cmd(self, args):
+    def _run_cmd(self, args, output=False):
         env = dict(os.environ)
+        tf_env = {}
         if LazyPluginCacheDir.resolve():
-            env["TF_PLUGIN_CACHE_DIR"] = LazyPluginCacheDir.resolve()
-        env["TF_IN_AUTOMATION"] = "yes"
+            tf_env["TF_PLUGIN_CACHE_DIR"] = LazyPluginCacheDir.resolve()
+        tf_env["TF_IN_AUTOMATION"] = "yes"
         if self.module_dir:
-            env["TF_DATA_DIR"] = self.work_dir
+            tf_env["TF_DATA_DIR"] = self.work_dir
         cwd = self.module_dir or self.work_dir
-        print("run cmd", args, file=sys.stderr)
+        env.update(tf_env)
+        print("run cmd", args, tf_env, cwd, file=sys.stderr)
         run_cmd = subprocess.check_call
-        run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
+        if output:
+            run_cmd = subprocess.check_output
+        return run_cmd(args, cwd=cwd, stderr=subprocess.STDOUT, env=env)
 
 
 class TerraformStateJson(UserString):
@@ -152,9 +164,20 @@ class TerraformState(object):
     attributes which contain the key 'name' will also be present.
     """
 
-    def __init__(self, resources, outputs):
+    def __init__(self, resources, outputs, runner=None):
+        self._runner = runner
         self.outputs = outputs
         self.resources = resources
+
+    @property
+    def work_dir(self):
+        if self._runner:
+            return self._runner.work_dir
+
+    @property
+    def terraform(self):
+        if self._runner:
+            return self._runner
 
     def __getitem__(self, k):
         v = self.get(k)
@@ -189,7 +212,7 @@ class TerraformState(object):
         return default
 
     @classmethod
-    def from_file(cls, path: str):
+    def from_file(cls, path: str, runner=None):
         """create TerraformState from a file
 
         File can either be a Terraform Plan state, or a recorded
@@ -201,17 +224,17 @@ class TerraformState(object):
         with open(path) as fh:
             state = fh.read()
 
-        return cls.from_string(state)
+        return cls.from_string(state, runner)
 
     @classmethod
-    def from_string(cls, state: Union[TerraformStateJson, str]):
+    def from_string(cls, state: Union[TerraformStateJson, str], runner=None):
         """create TerraformState from string
 
         State string can be a bytestring or a TerraformStateJson
         string object
         """
         resources, outputs = cls.parse_state(state)
-        return cls(resources, outputs)
+        return cls(resources, outputs, runner)
 
     def update(self, state: Union[TerraformStateJson, str]):
         """update TerraformState values"""
@@ -385,7 +408,7 @@ class TerraformFixture(object):
         try:
             state = self.runner.apply()
             state_json = state.export()
-            test_api = TerraformTestApi.from_string(state_json)
+            test_api = TerraformTestApi.from_string(state_json, self.runner)
 
             self.config.hook.pytest_terraform_modify_state(tfstate=state_json)
 
