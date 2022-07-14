@@ -493,7 +493,7 @@ class FixtureDecoratorFactory(object):
             PytestConfig.resolve(),
         )
         self._fixtures.append(tfix)
-        marker = pytest.fixture(scope=scope, name=terraform_dir)
+        marker = pytest.fixture(scope=scope, name=name)
         f.f_locals[name] = marker(tfix)
         return self.nonce_decorator
 
