@@ -1,0 +1,37 @@
+name: Release
+on:
+  push:
+    tags:
+      - v*
+  workflow_dispatch:
+    inputs: {}
+
+jobs:
+  Upload:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+          cache: "poetry"
+
+      - name: Install dependencies
+        run: poetry install
+
+      - name: Build
+        run: |
+          poetry build
+          md5sum dist/*
+
+      - name: Publish
+        if: startsWith(github.ref, 'refs/tags/')
+        run:
+          poetry config http-basic.pypi "__token__" "${{ secrets.PYPI_TOKEN }}"
+          poetry publish
