@@ -6,8 +6,6 @@ on:
   workflow_dispatch:
     inputs: {}
 
-permissions: {}
-
 jobs:
   Upload:
     runs-on: ubuntu-latest
