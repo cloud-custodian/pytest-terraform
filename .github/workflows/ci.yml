@@ -8,14 +8,16 @@ on:
     branches:
       - main
 
+permissions: {}
+
 jobs:
   Lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v4
         with:
-          python-version: 3.8
+          python-version: "3.10"
       - name: Linting
         run: |
           pip install pre-commit
@@ -26,48 +28,27 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.8, 3.9]
+        python-version: [3.9, "3.10"]
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Install poetry
-        shell: bash
-        run: |
-          pip install poetry
+        run: pipx install poetry
 
-      - name: Configure poetry
-        shell: bash
-        run: poetry config virtualenvs.in-project true
-
-      - name: Set up cache
-        uses: actions/cache@v1
-        id: cache
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
         with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.full-python-version.outputs.version }}-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Ensure cache is healthy
-        if: steps.cache.outputs.cache-hit == 'true'
-        shell: bash
-        run: poetry run pip --version >/dev/null 2>&1 || rm -rf .venv
+          python-version: "${{ matrix.python-version }}"
+          cache: "poetry"
 
       - name: Install dependencies
-        shell: bash
         run: poetry install
 
       - name: Pytest run w/ xdist
-        shell: bash
         run: poetry run pytest -v -n auto tests
 
       - name: Coverage run pytest
-        shell: bash
         run: poetry run coverage run --source pytest_terraform -m pytest tests
 
       - name: Coverage Generate XML

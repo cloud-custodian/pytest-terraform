@@ -54,7 +54,7 @@ def pytest_configure(config):
 
 
 def pytest_addhooks(pluginmanager):
-    """ Register pytest_terraform hooks """
+    """Register pytest_terraform hooks"""
     pluginmanager.add_hookspecs(hooks)
 
 
