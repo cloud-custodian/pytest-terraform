@@ -43,15 +43,12 @@ jobs:
           cache: "poetry"
 
       - name: Install dependencies
-        shell: bash
         run: poetry install
 
       - name: Pytest run w/ xdist
-        shell: bash
         run: poetry run pytest -v -n auto tests
 
       - name: Coverage run pytest
-        shell: bash
         run: poetry run coverage run --source pytest_terraform -m pytest tests
 
       - name: Coverage Generate XML
