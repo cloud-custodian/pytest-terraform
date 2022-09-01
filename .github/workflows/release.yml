@@ -32,6 +32,6 @@ jobs:
 
       - name: Publish
         if: startsWith(github.ref, 'refs/tags/')
-        run:
+        run: |
           poetry config http-basic.pypi "__token__" "${{ secrets.PYPI_TOKEN }}"
           poetry publish
