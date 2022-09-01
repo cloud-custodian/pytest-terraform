@@ -34,7 +34,7 @@ jobs:
           poetry build
           md5sum dist/*
 
-      - uses: Publish
+      - name: Publish
         shell: bash
         if: startsWith(github.ref, 'refs/tags/')
         run:
