@@ -16,6 +16,7 @@ import json
 import os
 import subprocess
 import sys
+import shutil
 from collections import UserString, defaultdict
 from typing import Any, Dict, Optional, Tuple, Union
 
@@ -382,7 +383,7 @@ class TerraformFixture(object):
             str(work_dir),
             module_dir=module_dir,
             plugin_cache=LazyPluginCacheDir.resolve(),
-            tf_bin=LazyTfBin.resolve(),
+            tf_bin=self.tf_bin,
         )
 
     def __call__(self, request, tmpdir_factory, worker_id):
@@ -459,6 +460,7 @@ class FixtureDecoratorFactory(object):
         replay=None,
         name=None,
         teardown=td.DEFAULT,
+        terraform_bin=None,
     ):
         # We have to hook into where fixture discovery will find
         # our fixtures, the easiest option is to store on the module that
@@ -482,8 +484,13 @@ class FixtureDecoratorFactory(object):
         if found:
             return self.nonce_decorator
         tclass = self.scope_class_map[scope]
+        tf_bin = (
+            shutil.which(terraform_bin)
+            if terraform_bin is not None
+            else LazyTfBin.resolve()
+        )
         tfix = tclass(
-            LazyTfBin,
+            tf_bin,
             LazyPluginCacheDir,
             scope,
             terraform_dir,

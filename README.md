@@ -20,6 +20,7 @@ pytest_terraform provides a `terraform` decorator with the following parameters:
 | `replay`             | no        | Boolean | `True`       | Use recorded resources instead of invoking terraform. See [Replay Support](#replay-support) for more details. |
 | `name`               | no        | String  | `None`       | Name used for the fixture. This defaults to the `terraform_dir` when `None` is supplied. |
 | `teardown`           | no        | String  | `"default"`  | Configure which teardown mode is used for terraform resources. See [Teardown Options](#teardown-options) for more details. |
+| `terraform_binary`           | no        | String  | `None`  | Override the primary Terraform binary on specific tests. See [Terraform Versions](#terraform-versions) for more details. |
 
 ### Example
 
@@ -147,6 +148,34 @@ def test_sqs(aws_sqs):
    queue_url = aws_sqs['test_queue.queue_url']
    print(queue_url)
 ```
+
+### Terraform versions
+
+`pytest_terraform` overrides the primary Terraform binary if `terraform_binary` is specified on a particular test.
+
+This may be useful for testing compatibility with different versions of Terraform.
+
+The value of `terraform_binary` must be available on the PATH, or must be a direct path. 
+
+For example, to use Terraform version 0.15.5 and 1.3.2 for specific tests:
+
+```python
+from pytest_terraform import terraform
+
+# Ensure that terraform_0.15.5 is on your PATH
+@terraform('main', terraform_binary="terraform_0.15.5")
+def test_version_0_15_5(main):
+    pass
+
+# Ensure that terraform_1.3.2 is on your PATH
+@terraform('main', terraform_binary="terraform_1.3.2")
+def test_version_1_3_2(main):
+    pass
+```
+
+You may want to look at [`tfenv`](https://github.com/tfutils/tfenv) for managing multiple Terraform versions on Mac OS / Linux.
+
+On Windows, you could copy `terraform.exe` to `terraform_0.15.5.exe`.
 
 ## Hooks
 

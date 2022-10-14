@@ -1,4 +1,5 @@
 import subprocess
+import shutil
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -159,3 +160,17 @@ def test_tf_factory_teardown_config_default(_, frame_path_mock, fixture_call_moc
     df = tf.FixtureDecoratorFactory()
     df(terraform_dir="test")
     assert df._fixtures[0].teardown_config == tf.td.ON
+
+
+def test_tf_bin():
+    df = tf.FixtureDecoratorFactory()
+    df(terraform_dir="test", terraform_bin="fakebin")
+    assert df._fixtures[0].tf_bin is None
+
+    df = tf.FixtureDecoratorFactory()
+    df(terraform_dir="test", terraform_bin="date")
+    assert df._fixtures[0].tf_bin == shutil.which("date")
+
+    df = tf.FixtureDecoratorFactory()
+    df(terraform_dir="test", terraform_bin=shutil.which("date"))
+    assert df._fixtures[0].tf_bin == shutil.which("date")
