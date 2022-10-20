@@ -5,6 +5,9 @@ import shutil
 from pathlib import Path
 
 import pytest
+from unittest.mock import MagicMock
+
+from subprocess import CalledProcessError
 from pytest_terraform import tf
 from pytest_terraform.exceptions import InvalidState
 
@@ -172,6 +175,32 @@ resource "local_file" "foo" {
     assert isinstance(state.terraform.show(), dict)
     trunner.destroy()
     assert False is tmpdir.join("foo.bar").exists()
+
+
+@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
+def test_tf_runner_destroy_if_apply_fails(testdir, tmpdir):
+    # ** requires network access to install plugin **
+    with open(tmpdir.join("resources.tf"), "w") as fh:
+        fh.write(
+            """
+resource "local_file" "foo" {
+    content     = "foo!"
+    filename = "${path.module}/foo.bar"
+}
+data "local_file" "foo" {
+    filename = "${path.module}/foo_doesnt_exist.bar"
+    depends_on = [
+        local_file.foo
+    ]
+}
+"""
+        )
+    trunner = tf.TerraformRunner(tmpdir.strpath, tf_bin=shutil.which("terraform"))
+    trunner.destroy = MagicMock()
+    trunner.init()
+    with pytest.raises(CalledProcessError):
+        trunner.apply()
+    trunner.destroy.assert_called_once()
 
 
 def xtest_bar_fixture(testdir):
