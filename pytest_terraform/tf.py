@@ -72,8 +72,15 @@ class TerraformRunner(object):
             apply_args = self._get_cmd_args("apply", plan=plan_path)
         elif plan:
             apply_args = self._get_cmd_args("apply", plan="")
-        self._run_cmd(apply_args)
-        return TerraformState.from_file(self.state_path, self)
+        try:
+            self._run_cmd(apply_args)
+            return TerraformState.from_file(self.state_path, self)
+        except subprocess.CalledProcessError as e:
+            try:
+                # Try to destroy partially applied resources
+                self.destroy()
+            finally:
+                raise e from None
 
     def plan(self, output=""):
         output = output and "-out=%s" % output or ""
@@ -266,7 +273,8 @@ class TerraformState(object):
 
         for r in data.get("resources", ()):
             rmap = resources.setdefault(r["type"], {})
-            rmap[r["name"]] = dict(r["instances"][0]["attributes"])
+            if len(r["instances"]) > 0:
+                rmap[r["name"]] = dict(r["instances"][0]["attributes"])
 
         outputs = data.get("outputs", {})
         for m in data.get("modules", ()):
