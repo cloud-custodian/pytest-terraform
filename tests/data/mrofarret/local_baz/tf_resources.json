@@ -6,6 +6,12 @@
             "baz": {
                 "content": "baz!",
                 "content_base64": null,
+                "content_base64sha256": "GYygEuKSfhfg6WboOiMUAbr6WmzBaW3c/WCzdMKQ6Fw=",
+                "content_base64sha512": "+TyTAUP/jTLn89UpzicEjCK6AdmN4KBYd1WlDfKNwgAHrY9D6s+WqkuAb/ZoKd4TSDSNN+uFUt31+CFFjhCSdA==",
+                "content_md5": "4d36b5881759f7b1e3d65b5be9dc6790",
+                "content_sha1": "5fc5caaa8d04abb85be16b17953cd1a6e3ed549b",
+                "content_sha256": "198ca012e2927e17e0e966e83a231401bafa5a6cc1696ddcfd60b374c290e85c",
+                "content_sha512": "f93c930143ff8d32e7f3d529ce27048c22ba01d98de0a0587755a50df28dc20007ad8f43eacf96aa4b806ff66829de1348348d37eb8552ddf5f821458e109274",
                 "directory_permission": "0777",
                 "file_permission": "0777",
                 "filename": "./baz.txt",
