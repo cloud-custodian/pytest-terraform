@@ -7,5 +7,5 @@ __pycache__
 dist/
 pytestdebug.log
 .venv
-
+.python-version
 tests/**/.terraform.lock.hcl
