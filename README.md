@@ -100,12 +100,6 @@ You can provide the path to the terraform binary else its auto discovered
 --tf-binary=$HOME/bin/terraform
 ```
 
-To avoid repeated downloading of plugins a plugin cache dir is utilized
-by default this is `.tfcache` in the current working directory.
-```shell
---tf-plugin-dir=$HOME/.cache/tfcache
-```
-
 Terraform modules referenced by fixtures are looked up in a few different
 locations, directly in the same directory as the test module, in a subdir
 named terraform, and in a sibling directory named terraform. An explicit
