@@ -67,7 +67,6 @@ class ScopedTerraformFixture(tf.TerraformFixture):
 
 
 class XDistTerraform(object):
-
     # Hooks
     # https://github.com/pytest-dev/pytest-xdist/blob/master/src/xdist/newhooks.py
 
@@ -115,7 +114,7 @@ class XDistTerraform(object):
         return fixture_map
 
     # worker hooks
-    def pytest_collection_modifyitems(self, session, config, items):
+    def pytest_collection_finish(self, session):
         """write out the collections of fixtures -> test ids
 
         in xdist this is only called from the workers
@@ -125,7 +124,7 @@ class XDistTerraform(object):
             for t in tf.terraform.get_fixtures()
             if isinstance(t, ScopedTerraformFixture)
         }
-        self.fixture_map = self.generate_fixture_map(items)
+        self.fixture_map = self.generate_fixture_map(session.items)
 
     def pytest_runtest_teardown(self, item, nextitem):
         found = []
@@ -178,7 +177,8 @@ class XDistTerraform(object):
             if self.completed.issuperset(self.fixture_map[f]):
                 if tf.LazyTFDebug.resolve(False):
                     print(
-                        "%s worker session down cleanup %s" % (self.wid, f), file=sys.stderr
+                        "%s worker session down cleanup %s" % (self.wid, f),
+                        file=sys.stderr,
                     )
                 tf.terraform.get_fixture(f).tear_down()
             else:

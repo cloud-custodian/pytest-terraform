@@ -28,7 +28,6 @@ from .options import teardown as td
 
 
 class TerraformRunner(object):
-
     command_templates = {
         "init": "init {input} {color} {plugin_dir}",
         "apply": "apply {input} {color} {state} {approve} {plan}",
@@ -54,7 +53,6 @@ class TerraformRunner(object):
         stream_output=None,
         tf_bin=None,
     ):
-
         self.work_dir = work_dir
         self.module_dir = module_dir
         # use parent dir of work/data dir to avoid
