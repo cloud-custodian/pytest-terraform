@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import shutil
 from collections import defaultdict
 
@@ -25,9 +24,9 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "terraform: tests using terraform fixtures")
 
     cache_dir = config.getoption("dest_tf_plugin")
-    if not os.path.exists(cache_dir):
-        os.mkdir(cache_dir)
-    tf.LazyPluginCacheDir.value = os.path.abspath(cache_dir)
+
+    if cache_dir:
+        pass
 
     tf.LazyModuleDir.value = config.getoption("dest_tf_mod_dir") or config.getini(
         "terraform-mod-dir"
@@ -44,6 +43,7 @@ def pytest_configure(config):
         )
 
     tf.PytestConfig.value = config
+    tf.LazyTFDebug.value = config.getoption("dest_tf_debug") or False
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
@@ -73,6 +73,12 @@ def pytest_addoption(parser):
         help=("Use recorded resources instead of invoking terraform"),
     )
     group.addoption(
+        "--tf-debug",
+        action="store_true",
+        dest="dest_tf_debug",
+        help=("Debug terraform output and plugin output"),
+    )
+    group.addoption(
         "--tf-mod-dir",
         action="store",
         dest="dest_tf_mod_dir",
@@ -84,8 +90,8 @@ def pytest_addoption(parser):
         dest="dest_tf_plugin",
         default=".tfcache",
         help=(
-            "Use this directory for a terraform plugin cache "
-            "Default is to use .tfcache"
+            "[Depreceated] Use this directory for a terraform plugin cache "
+            "Default is to use .tfcache."
         ),
     )
 

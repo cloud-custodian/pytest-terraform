@@ -36,7 +36,7 @@ def test_tf_user_c(aws_sqs, aws_sns):
 
 
 def test_tf_user_many(aws_sqs, number_sequence):
-    return number_sequence
+    pass
 
 
 def test_tf_teardown_register():
@@ -84,7 +84,6 @@ def test_tf_teardown_exception():
 
 
 def test_tf_teardown_register_ignore():
-
     fixture = tf.TerraformFixture(
         tf_bin="fakebin",
         plugin_cache="fakecache",
