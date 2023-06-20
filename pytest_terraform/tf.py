@@ -115,8 +115,8 @@ class TerraformRunner(object):
             tf_env["TF_DATA_DIR"] = self.work_dir
         cwd = self.module_dir or self.work_dir
         env.update(tf_env)
-        if self.debug:
-            print("run cmd", args, tf_env, cwd, file=sys.stderr)
+
+        write_log("run cmd", args, tf_env, cwd)
         run_cmd = subprocess.check_call
         if output:
             run_cmd = subprocess.check_output
@@ -343,6 +343,13 @@ PytestConfig = PlaceHolderValue("pytestconfig")
 LazyTFDebug = PlaceHolderValue("tf_debug")
 
 
+def write_log(msg, *parts):
+    if LazyTFDebug.resolve(False):
+        if parts:
+            msg = " ".join((msg, *(map(str, parts))))
+        print("%s\n" % msg, file=sys.stderr)
+
+
 class TerraformFixture(object):
     def __init__(
         self,
@@ -413,8 +420,7 @@ class TerraformFixture(object):
         return self.create(request, module_dir)
 
     def create(self, request, module_dir):
-        if LazyTFDebug.resolve():
-            print("tf create %s" % self.tf_root_module, file=sys.stderr)
+        write_log("tf create %s" % self.tf_root_module)
         self.runner.init()
         if self.teardown_config != td.OFF:
             request.addfinalizer(self.tear_down)
@@ -434,8 +440,7 @@ class TerraformFixture(object):
 
     def tear_down(self):
         # config behavor on runner
-        if LazyTFDebug.resolve():
-            print("tf teardown %s" % self.tf_root_module, file=sys.stderr)
+        write_log("tf teardown %s" % self.tf_root_module)
         try:
             self.runner.destroy()
         except subprocess.CalledProcessError as e:
