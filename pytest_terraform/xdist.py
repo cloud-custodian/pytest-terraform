@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import sys
 
 from pytest_terraform import tf
 from pytest_terraform.lock import lock_create, lock_delete
