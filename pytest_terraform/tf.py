@@ -108,7 +108,7 @@ class TerraformRunner(object):
     def _run_cmd(self, args, output=False):
         env = dict(os.environ)
         tf_env = {}
-        if LazyPluginCacheDir.resolve():
+        if LazyPluginCacheDir.resolve(False):
             tf_env["TF_PLUGIN_CACHE_DIR"] = LazyPluginCacheDir.resolve()
         tf_env["TF_IN_AUTOMATION"] = "yes"
         if self.module_dir:
@@ -393,7 +393,7 @@ class TerraformFixture(object):
         return TerraformRunner(
             str(work_dir),
             module_dir=module_dir,
-            plugin_cache=LazyPluginCacheDir.resolve(),
+            plugin_cache=LazyPluginCacheDir.resolve(False),
             tf_bin=LazyTfBin.resolve(),
         )
 

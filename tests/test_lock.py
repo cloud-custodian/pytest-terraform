@@ -2,7 +2,6 @@ from pytest_terraform.lock import lock_create, lock_delete
 
 
 def test_lock_create(tmpdir):
-
     path = tmpdir / "foo"
 
     with lock_create(path) as (success, result):
@@ -18,7 +17,6 @@ def test_lock_create(tmpdir):
 
 
 def test_lock_create_ctx_fail(tmpdir):
-
     path = tmpdir / "foo2"
 
     try:
