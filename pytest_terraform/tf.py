@@ -42,8 +42,6 @@ class TerraformRunner(object):
         "approve": "-auto-approve",
     }
 
-    debug = False
-
     def __init__(
         self,
         work_dir,
@@ -370,10 +368,6 @@ class TerraformFixture(object):
         self.runner = None
         self.teardown_config = td.resolve(teardown)
         self.config = pytest_config
-
-    @property
-    def debug(self):
-        return LazyTFDebug.resolve(False)
 
     @property
     def name(self):

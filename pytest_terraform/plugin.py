@@ -44,7 +44,6 @@ def pytest_configure(config):
 
     tf.PytestConfig.value = config
     tf.LazyTFDebug.value = config.getoption("dest_tf_debug") or False
-    tf.TerraformRunner.debug = config.getoption("dest_tf_debug") or False
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
