@@ -45,11 +45,11 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Pytest run w/ xdist
-        run: poetry run pytest -v -n auto tests
-
       - name: Coverage run pytest
         run: poetry run coverage run --source pytest_terraform -m pytest tests
+
+      - name: Pytest run w/ xdist
+        run: poetry run pytest -v -n auto tests
 
       - name: Coverage Generate XML
         run: |
