@@ -6,6 +6,12 @@
             "bar": {
                 "content": "bar!",
                 "content_base64": null,
+                "content_base64sha256": "5oe3SfLNk2FZI6L3Bfqs5AM/NdV8z8plLNw5YWqUo8I=",
+                "content_base64sha512": "VsefHG45EmC85EGPSPpysV0kAveNz+q1rVoPqeeCbQQvU0uqL2FVcWPb8rOkDU9mk2y4Tj/XME5p+8h1nWC5+Q==",
+                "content_md5": "bb0d3e2eb8e78f4a10d55415e8e4677f",
+                "content_sha1": "3811e1a645e5371113584e6d18ff4843378ae590",
+                "content_sha256": "e687b749f2cd93615923a2f705faace4033f35d57ccfca652cdc39616a94a3c2",
+                "content_sha512": "56c79f1c6e391260bce4418f48fa72b15d2402f78dcfeab5ad5a0fa9e7826d042f534baa2f61557163dbf2b3a40d4f66936cb84e3fd7304e69fbc8759d60b9f9",
                 "directory_permission": "0777",
                 "file_permission": "0777",
                 "filename": "./bar.txt",

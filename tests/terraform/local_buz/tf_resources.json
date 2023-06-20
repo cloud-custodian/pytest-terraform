@@ -6,6 +6,12 @@
             "buz": {
                 "content": "fiz!",
                 "content_base64": null,
+                "content_base64sha256": "vikCmJzo1ZIiWEGfSvi3H0Oo2j+ng10mVvm7NrRW0lA=",
+                "content_base64sha512": "GxyZFjCjcNwXzgqwpesqGF9dHIdc4AxX+rFuTvktUHpPFLG8tXNV00zQuScillgb47xOlofyYlTX0FGZGE4rGQ==",
+                "content_md5": "b41ba5b9c442140644b7d2203ccb7da1",
+                "content_sha1": "1eb8252c1ec503dce3b41735251e12bdeadf1493",
+                "content_sha256": "be2902989ce8d5922258419f4af8b71f43a8da3fa7835d2656f9bb36b456d250",
+                "content_sha512": "1b1c991630a370dc17ce0ab0a5eb2a185f5d1c875ce00c57fab16e4ef92d507a4f14b1bcb57355d34cd0b9272296581be3bc4e9687f26254d7d05199184e2b19",
                 "directory_permission": "0777",
                 "file_permission": "0777",
                 "filename": "./buz.txt",
