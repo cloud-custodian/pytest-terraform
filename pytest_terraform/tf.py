@@ -28,7 +28,6 @@ from .options import teardown as td
 
 
 class TerraformRunner(object):
-
     command_templates = {
         "init": "init {input} {color} {plugin_dir}",
         "apply": "apply {input} {color} {state} {approve} {plan}",
@@ -43,8 +42,6 @@ class TerraformRunner(object):
         "approve": "-auto-approve",
     }
 
-    debug = False
-
     def __init__(
         self,
         work_dir,
@@ -54,7 +51,6 @@ class TerraformRunner(object):
         stream_output=None,
         tf_bin=None,
     ):
-
         self.work_dir = work_dir
         self.module_dir = module_dir
         # use parent dir of work/data dir to avoid
@@ -110,14 +106,15 @@ class TerraformRunner(object):
     def _run_cmd(self, args, output=False):
         env = dict(os.environ)
         tf_env = {}
-        if LazyPluginCacheDir.resolve():
+        if LazyPluginCacheDir.resolve(False):
             tf_env["TF_PLUGIN_CACHE_DIR"] = LazyPluginCacheDir.resolve()
         tf_env["TF_IN_AUTOMATION"] = "yes"
         if self.module_dir:
             tf_env["TF_DATA_DIR"] = self.work_dir
         cwd = self.module_dir or self.work_dir
         env.update(tf_env)
-        print("run cmd", args, tf_env, cwd, file=sys.stderr)
+
+        write_log("run cmd", args, tf_env, cwd)
         run_cmd = subprocess.check_call
         if output:
             run_cmd = subprocess.check_output
@@ -331,7 +328,7 @@ class PlaceHolderValue(object):
         self.value = None
 
     def resolve(self, default=None):
-        if not self.value and default:
+        if self.value is None and default is None:
             raise ValueError("PlaceHolderValue %s not resolved" % self.name)
         return self.value or default
 
@@ -341,6 +338,14 @@ LazyModuleDir = PlaceHolderValue("module_dir")
 LazyPluginCacheDir = PlaceHolderValue("plugin_cache")
 LazyTfBin = PlaceHolderValue("tf_bin_path")
 PytestConfig = PlaceHolderValue("pytestconfig")
+LazyTFDebug = PlaceHolderValue("tf_debug")
+
+
+def write_log(msg, *parts):
+    if LazyTFDebug.resolve(False):
+        if parts:
+            msg = " ".join((msg, *(map(str, parts))))
+        print("%s\n" % msg, file=sys.stderr)
 
 
 class TerraformFixture(object):
@@ -389,7 +394,7 @@ class TerraformFixture(object):
         return TerraformRunner(
             str(work_dir),
             module_dir=module_dir,
-            plugin_cache=LazyPluginCacheDir.resolve(),
+            plugin_cache=LazyPluginCacheDir.resolve(False),
             tf_bin=LazyTfBin.resolve(),
         )
 
@@ -409,7 +414,7 @@ class TerraformFixture(object):
         return self.create(request, module_dir)
 
     def create(self, request, module_dir):
-        print("tf create %s" % self.tf_root_module, file=sys.stderr)
+        write_log("tf create %s" % self.tf_root_module)
         self.runner.init()
         if self.teardown_config != td.OFF:
             request.addfinalizer(self.tear_down)
@@ -429,7 +434,7 @@ class TerraformFixture(object):
 
     def tear_down(self):
         # config behavor on runner
-        print("tf teardown %s" % self.tf_root_module, file=sys.stderr)
+        write_log("tf teardown %s" % self.tf_root_module)
         try:
             self.runner.destroy()
         except subprocess.CalledProcessError as e:

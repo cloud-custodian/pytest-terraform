@@ -144,7 +144,6 @@ def test_tf_statejson_update_dict():
 
 
 def test_tf_statejson_update_bad():
-
     statejson = tf.TerraformStateJson("hello")
 
     with pytest.raises(ValueError):

@@ -6,6 +6,12 @@
             "foo": {
                 "content": "foo!",
                 "content_base64": null,
+                "content_base64sha256": "wOCqrqBQvPO+JsDCPVj6iQwN+3nIojAWtKhs0oym6nE=",
+                "content_base64sha512": "TSCmPxazw2YStHurNILfRykjK/J4evgArH/2KnQuzQZodz4cq1f/ig2GeQO7mBI+Qx5jkTQEZxLCGs3mPtsB3Q==",
+                "content_md5": "35af8b7a9490467f75f19c1e5459f7e7",
+                "content_sha1": "4bf3e335199107182c6f7638efaad377acc7f452",
+                "content_sha256": "c0e0aaaea050bcf3be26c0c23d58fa890c0dfb79c8a23016b4a86cd28ca6ea71",
+                "content_sha512": "4d20a63f16b3c36612b47bab3482df4729232bf2787af800ac7ff62a742ecd0668773e1cab57ff8a0d867903bb98123e431e639134046712c21acde63edb01dd",
                 "directory_permission": "0777",
                 "file_permission": "0777",
                 "filename": "./foo.txt",

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os
-import sys
 
 from pytest_terraform import tf
 from pytest_terraform.lock import lock_create, lock_delete
@@ -34,9 +33,8 @@ class ScopedTerraformFixture(tf.TerraformFixture):
 
         with lock_create(self.state_dir / self.name) as (success, result):
             if success:
-                print(
-                    "%s create %s - success: %s" % (self.wid, self.name, success),
-                    file=sys.stderr,
+                tf.write_log(
+                    "%s create %s - success: %s" % (self.wid, self.name, success)
                 )
                 tf_test_api = super(ScopedTerraformFixture, self).create(
                     request, module_dir
@@ -55,17 +53,13 @@ class ScopedTerraformFixture(tf.TerraformFixture):
             if not success:
                 return
             work_dir = (self.state_dir / self.name).read_text("utf8")
-            print(
-                "%s teardown %s work-dir %s" % (self.wid, self.name, success),
-                file=sys.stderr,
-            )
+            tf.write_log("%s teardown %s work-dir %s" % (self.wid, self.name, success))
             super(ScopedTerraformFixture)
             runner = self.get_runner(self.resolve_module_dir(), work_dir)
             runner.destroy()
 
 
 class XDistTerraform(object):
-
     # Hooks
     # https://github.com/pytest-dev/pytest-xdist/blob/master/src/xdist/newhooks.py
 
@@ -113,7 +107,7 @@ class XDistTerraform(object):
         return fixture_map
 
     # worker hooks
-    def pytest_collection_modifyitems(self, session, config, items):
+    def pytest_collection_finish(self, session):
         """write out the collections of fixtures -> test ids
 
         in xdist this is only called from the workers
@@ -123,7 +117,7 @@ class XDistTerraform(object):
             for t in tf.terraform.get_fixtures()
             if isinstance(t, ScopedTerraformFixture)
         }
-        self.fixture_map = self.generate_fixture_map(items)
+        self.fixture_map = self.generate_fixture_map(session.items)
 
     def pytest_runtest_teardown(self, item, nextitem):
         found = []
@@ -148,9 +142,8 @@ class XDistTerraform(object):
             # print('%s check result %s %s:%s' % (
             #       self.wid, completed, f, self.fixture_map[f]))
             if self.completed.issuperset(self.fixture_map[f]):
-                print(
+                tf.write_log(
                     "%s execute test:%s teardown %s" % (self.wid, item.nodeid, f),
-                    file=sys.stderr,
                 )
                 tf.terraform.get_fixture(f).tear_down()
                 self.fixture_map.pop(f)
@@ -173,14 +166,12 @@ class XDistTerraform(object):
             if f not in self.fixture_map:
                 continue
             if self.completed.issuperset(self.fixture_map[f]):
-                print(
-                    "%s worker session down cleanup %s" % (self.wid, f), file=sys.stderr
-                )
+                tf.write_log("%s worker session down cleanup %s" % (self.wid, f))
                 tf.terraform.get_fixture(f).tear_down()
             else:
                 remains.append(str((f, self.fixture_map[f].difference(self.completed))))
         if remains:
-            print("%s tf remains %s" % (self.wid, remains), file=sys.stderr)
+            tf.write_log("%s tf remains %s" % (self.wid, remains))
 
     # master hooks
     def pytest_report_teststatus(self, report, config):

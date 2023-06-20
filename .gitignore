@@ -8,4 +8,4 @@ dist/
 pytestdebug.log
 .venv
 
-tests/**/.terraform.lock.hcl
+# tests/**/.terraform.lock.hcl
