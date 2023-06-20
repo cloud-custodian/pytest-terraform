@@ -117,7 +117,8 @@ class TerraformRunner(object):
             tf_env["TF_DATA_DIR"] = self.work_dir
         cwd = self.module_dir or self.work_dir
         env.update(tf_env)
-        print("run cmd", args, tf_env, cwd, file=sys.stderr)
+        if self.debug:
+            print("run cmd", args, tf_env, cwd, file=sys.stderr)
         run_cmd = subprocess.check_call
         if output:
             run_cmd = subprocess.check_output
@@ -331,7 +332,7 @@ class PlaceHolderValue(object):
         self.value = None
 
     def resolve(self, default=None):
-        if not self.value and default:
+        if self.value is None and default is None:
             raise ValueError("PlaceHolderValue %s not resolved" % self.name)
         return self.value or default
 
@@ -341,6 +342,7 @@ LazyModuleDir = PlaceHolderValue("module_dir")
 LazyPluginCacheDir = PlaceHolderValue("plugin_cache")
 LazyTfBin = PlaceHolderValue("tf_bin_path")
 PytestConfig = PlaceHolderValue("pytestconfig")
+LazyTFDebug = PlaceHolderValue("tf_debug")
 
 
 class TerraformFixture(object):
@@ -363,6 +365,10 @@ class TerraformFixture(object):
         self.runner = None
         self.teardown_config = td.resolve(teardown)
         self.config = pytest_config
+
+    @property
+    def debug(self):
+        return LazyTFDebug.resolve(False)
 
     @property
     def name(self):
@@ -409,7 +415,8 @@ class TerraformFixture(object):
         return self.create(request, module_dir)
 
     def create(self, request, module_dir):
-        print("tf create %s" % self.tf_root_module, file=sys.stderr)
+        if LazyTFDebug.resolve():
+            print("tf create %s" % self.tf_root_module, file=sys.stderr)
         self.runner.init()
         if self.teardown_config != td.OFF:
             request.addfinalizer(self.tear_down)
@@ -429,7 +436,8 @@ class TerraformFixture(object):
 
     def tear_down(self):
         # config behavor on runner
-        print("tf teardown %s" % self.tf_root_module, file=sys.stderr)
+        if LazyTFDebug.resolve():
+            print("tf teardown %s" % self.tf_root_module, file=sys.stderr)
         try:
             self.runner.destroy()
         except subprocess.CalledProcessError as e:

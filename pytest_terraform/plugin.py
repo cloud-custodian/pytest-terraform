@@ -44,6 +44,8 @@ def pytest_configure(config):
         )
 
     tf.PytestConfig.value = config
+    tf.LazyTFDebug.value = config.getoption('dest_tf_debug') or False
+    tf.TerraformRunner.debug = config.getoption('dest_tf_debug') or False
 
     if config.pluginmanager.hasplugin("xdist"):
         config.pluginmanager.register(xdist.XDistTerraform(config))
@@ -72,6 +74,12 @@ def pytest_addoption(parser):
         dest="dest_tf_replay",
         help=("Use recorded resources instead of invoking terraform"),
     )
+    group.addoption(
+        "--tf-debug",
+        action="store_true",
+        dest="dest_tf_debug",
+        help=("Debug terraform output and plugin output"),
+    )    
     group.addoption(
         "--tf-mod-dir",
         action="store",
