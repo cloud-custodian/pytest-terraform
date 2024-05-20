@@ -51,7 +51,7 @@ jobs:
       - name: Pytest run w/ xdist
         run: poetry run pytest -v -n auto tests
 
-     - name: Upload Code Coverage
+      - name: Upload Code Coverage
         uses: codecov/codecov-action@v4
         if: contains(matrix.python-version, '3.10') && contains(matrix.os, 'ubuntu')
         with:
