@@ -36,9 +36,9 @@ def pytest_configure(config):
         tf.LazyReplay.value = config.getoption("dest_tf_replay")
 
     tf.LazyTfBin.value = (
-        config.getoption("dest_tf_binary") or
-        shutil.which("terraform") or
-        shutil.which("tofu")
+        config.getoption("dest_tf_binary")
+        or shutil.which("terraform")
+        or shutil.which("tofu")
     )
 
     if tf.LazyTfBin.value is None and not tf.LazyReplay.value:
