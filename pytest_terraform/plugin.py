@@ -35,7 +35,12 @@ def pytest_configure(config):
     if tf.LazyReplay.value is None:
         tf.LazyReplay.value = config.getoption("dest_tf_replay")
 
-    tf.LazyTfBin.value = config.getoption("dest_tf_binary") or shutil.which("terraform")
+    tf.LazyTfBin.value = (
+        config.getoption("dest_tf_binary")
+        or shutil.which("tofu")
+        or shutil.which("terraform")
+    )
+
     if tf.LazyTfBin.value is None and not tf.LazyReplay.value:
         raise ValueError(
             "pytest-terraform requires terraform binary on PATH or "
