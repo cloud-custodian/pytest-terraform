@@ -55,7 +55,9 @@ class TerraformRunner(object):
         self.module_dir = module_dir
         # use parent dir of work/data dir to avoid
         # https://github.com/hashicorp/terraform/issues/22999
-        self.state_path = state_path or os.path.join(work_dir, "..", "terraform.tfstate")
+        self.state_path = state_path or os.path.join(
+            work_dir, "..", "terraform.tfstate"
+        )
         self.stream_output = stream_output
         self.plugin_cache = plugin_cache or ""
         self.tf_bin = tf_bin
@@ -248,7 +250,7 @@ class TerraformState(object):
 
     @staticmethod
     def parse_state(
-        state: Union[TerraformStateJson, str]
+        state: Union[TerraformStateJson, str],
     ) -> Tuple[Dict[str, any], Dict[str, Any]]:
         """extract resources and outputs from state
 
@@ -383,7 +385,9 @@ class TerraformFixture(object):
             self.test_dir.dirpath().join("terraform", self.tf_root_module),
         ]
         if LazyModuleDir.resolve():
-            candidates.insert(0, local(LazyModuleDir.resolve()).join(self.tf_root_module))
+            candidates.insert(
+                0, local(LazyModuleDir.resolve()).join(self.tf_root_module)
+            )
         for candidate in candidates:
             if not candidate.check(exists=1, dir=1):
                 continue
@@ -409,7 +413,9 @@ class TerraformFixture(object):
             return TerraformTestApi.from_file(
                 os.path.join(module_dir, "tf_resources.json")
             )
-        work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join("work")
+        work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join(
+            "work"
+        )
         self.runner = self.get_runner(module_dir, work_dir)
         return self.create(request, module_dir)
 

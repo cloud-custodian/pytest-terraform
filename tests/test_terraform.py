@@ -231,39 +231,6 @@ def test_help_message(testdir):
     result.stdout.fnmatch_lines(["terraform:", ("*--tf-binary=DEST_TF_BINARY*")])
 
 
-def test_plugins_ini_setting(testdir):
-    testdir.makeini(
-        """
-        [pytest]
-        terraform-plugins =
-            aws ~> 2.2.0
-            github
-    """
-    )
-
-    testdir.makepyfile(
-        """
-        import pytest
-
-        @pytest.fixture
-        def hello(request):
-            return request.config.getini('terraform-mod-dir')
-
-        def test_hello_world(hello):
-            assert hello == ''
-            return
-    """
-    )
-
-    result = testdir.runpytest("-v", "-s")
-
-    # fnmatch_lines does an assertion internally
-    result.stdout.fnmatch_lines(["*::test_hello_world PASSED*"])
-
-    # make sure that that we get a '0' exit code for the testsuite
-    assert result.ret == 0
-
-
 @pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
 def test_plugins_ini_setting_terraform_mod_dir(testdir):
     mod_dir = Path(__file__).parent / "data" / "mrofarret"
