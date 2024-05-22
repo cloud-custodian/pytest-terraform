@@ -1,7 +1,7 @@
 
 
 lint:
-	pre-commit run --all-files
+	ruff check pytest_terraform tests
 
 coverage:
 	coverage run --source pytest_terraform -m pytest tests
