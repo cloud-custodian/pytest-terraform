@@ -12,8 +12,8 @@ classifiers=[
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4.0"
-pytest = ">= 6.0"
+python = ">=3.8,<4.0"
+pytest = ">= 7.0"
 jmespath = ">= 0.10.0"
 portalocker = ">= 1.7.0"
 pytest-xdist = ">= 1.31.0"
