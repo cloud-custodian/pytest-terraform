@@ -150,20 +150,38 @@ def test_tf_statejson_update_bad():
         statejson.update({"hello": "world"})
 
 
-@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
-def test_tf_runner(testdir, tmpdir):
+@pytest.fixture
+def tf_bin():
+    return shutil.which("terraform")
+
+
+@pytest.fixture
+def trunner(tmpdir, tf_bin):
+    if not tf_bin:
+        pytest.skip("Terraform binary missing")
+    yield tf.TerraformRunner(tmpdir.strpath, tf_bin=tf_bin)
+
+
+@pytest.fixture
+def tmpdir_writer(tmpdir):
+    def write_file(content: str, filename="resources.tf"):
+        file_path = Path(tmpdir) / filename
+        file_path.write_text(content)
+
+    yield write_file
+
+
+def test_tf_runner(tmpdir, tmpdir_writer, trunner):
     # ** requires network access to install plugin **
-    with open(tmpdir.join("resources.tf"), "w") as fh:
-        fh.write(
-            """
+    tmpdir_writer(
+        """
 resource "local_file" "foo" {
     content     = "foo!"
     filename = "${path.module}/foo.bar"
 }
 """
-        )
+    )
 
-    trunner = tf.TerraformRunner(tmpdir.strpath, tf_bin=shutil.which("terraform"))
     trunner.init()
     state = trunner.apply()
     assert state.get("foo")["content"] == "foo!"
@@ -176,12 +194,10 @@ resource "local_file" "foo" {
     assert False is tmpdir.join("foo.bar").exists()
 
 
-@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
-def test_tf_runner_destroy_if_apply_fails(testdir, tmpdir):
+def test_tf_runner_destroy_if_apply_fails(tmpdir_writer, trunner):
     # ** requires network access to install plugin **
-    with open(tmpdir.join("resources.tf"), "w") as fh:
-        fh.write(
-            """
+    tmpdir_writer(
+        """
 resource "local_file" "foo" {
     content     = "foo!"
     filename = "${path.module}/foo.bar"
@@ -193,13 +209,52 @@ data "local_file" "foo" {
     ]
 }
 """
-        )
-    trunner = tf.TerraformRunner(tmpdir.strpath, tf_bin=shutil.which("terraform"))
+    )
     trunner.destroy = MagicMock()
     trunner.init()
     with pytest.raises(CalledProcessError):
         trunner.apply()
     trunner.destroy.assert_called_once()
+
+
+def test_tf_runner_env_dict(tmpdir_writer, trunner):
+    # ** requires network access to install plugin **
+    tmpdir_writer(
+        """
+variable "foo" {
+    type = string
+    default = ""
+}
+
+output "foo" {
+    value = var.foo
+}
+"""
+    )
+    trunner.env = {"TF_VAR_foo": "bar"}
+    trunner.init()
+    state = trunner.apply()
+    assert state.outputs["foo"]["value"] == "bar"
+
+
+def test_tf_runner_env_callable(tmpdir_writer, trunner):
+    # ** requires network access to install plugin **
+    tmpdir_writer(
+        """
+variable "foo" {
+    type = string
+    default = ""
+}
+
+output "foo" {
+    value = var.foo
+}
+"""
+    )
+    trunner.env = lambda: {"TF_VAR_foo": "bar"}
+    trunner.init()
+    state = trunner.apply()
+    assert state.outputs["foo"]["value"] == "bar"
 
 
 def xtest_bar_fixture(testdir):
