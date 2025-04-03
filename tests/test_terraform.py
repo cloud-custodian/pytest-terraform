@@ -151,7 +151,8 @@ def test_tf_statejson_update_bad():
 
 
 @pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
-def test_tf_runner(testdir, tmpdir):
+@pytest.mark.parametrize("plan", (True, False))
+def test_tf_runner(testdir, tmpdir, plan):
     # ** requires network access to install plugin **
     with open(tmpdir.join("resources.tf"), "w") as fh:
         fh.write(
@@ -165,7 +166,7 @@ resource "local_file" "foo" {
 
     trunner = tf.TerraformRunner(tmpdir.strpath, tf_bin=shutil.which("terraform"))
     trunner.init()
-    state = trunner.apply()
+    state = trunner.apply(plan=plan)
     assert state.get("foo")["content"] == "foo!"
     with open(tmpdir.join("foo.bar")) as fh:
         assert fh.read() == "foo!"

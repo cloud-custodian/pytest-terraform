@@ -64,11 +64,11 @@ class TerraformRunner(object):
 
     def apply(self, plan=True):
         """run terraform apply"""
-        if plan is True:
+        if plan:
             plan_path = os.path.join(self.work_dir, "tfplan")
             self.plan(plan_path)
             apply_args = self._get_cmd_args("apply", plan=plan_path)
-        elif plan:
+        else:
             apply_args = self._get_cmd_args("apply", plan="")
         try:
             self._run_cmd(apply_args)
