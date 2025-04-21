@@ -171,7 +171,9 @@ def tmpdir_writer(tmpdir):
     yield write_file
 
 
-def test_tf_runner(tmpdir, tmpdir_writer, trunner):
+@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
+@pytest.mark.parametrize("plan", (True, False))
+def test_tf_runner(testdir, tmpdir, plan):
     # ** requires network access to install plugin **
     tmpdir_writer(
         """
@@ -183,7 +185,7 @@ resource "local_file" "foo" {
     )
 
     trunner.init()
-    state = trunner.apply()
+    state = trunner.apply(plan=plan)
     assert state.get("foo")["content"] == "foo!"
     with open(tmpdir.join("foo.bar")) as fh:
         assert fh.read() == "foo!"
