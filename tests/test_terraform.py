@@ -171,9 +171,8 @@ def tmpdir_writer(tmpdir):
     yield write_file
 
 
-@pytest.mark.skipif(not shutil.which("terraform"), reason="Terraform binary missing")
 @pytest.mark.parametrize("plan", (True, False))
-def test_tf_runner(testdir, tmpdir, plan):
+def test_tf_runner(trunner, tmpdir_writer, tmpdir, plan):
     # ** requires network access to install plugin **
     tmpdir_writer(
         """
