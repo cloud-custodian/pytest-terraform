@@ -159,7 +159,16 @@ def tf_bin():
 def trunner(tmpdir, tf_bin):
     if not tf_bin:
         pytest.skip("Terraform binary missing")
-    yield tf.TerraformRunner(tmpdir.strpath, tf_bin=tf_bin)
+
+    # By default the TerraformRunner will set the state directory
+    # to be the parent of the work dir. Here we are using the tmpdir as the
+    # workdir, and we do not want to write outside our tmpdir, so set the state
+    # dir to be a subdirectory instead.
+    state_dir = Path(tmpdir) / "state"
+    state_dir.mkdir()
+    state_path = state_dir / "terraform.tfstate"
+
+    yield tf.TerraformRunner(tmpdir.strpath, tf_bin=tf_bin, state_path=str(state_path))
 
 
 @pytest.fixture
