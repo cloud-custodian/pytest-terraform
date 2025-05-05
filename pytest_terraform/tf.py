@@ -50,17 +50,17 @@ class TerraformRunner(object):
         plugin_cache=None,
         stream_output=None,
         tf_bin=None,
+        env=None,
     ):
         self.work_dir = work_dir
         self.module_dir = module_dir
         # use parent dir of work/data dir to avoid
         # https://github.com/hashicorp/terraform/issues/22999
-        self.state_path = state_path or os.path.join(
-            work_dir, "..", "terraform.tfstate"
-        )
+        self.state_path = state_path or os.path.join(work_dir, "..", "terraform.tfstate")
         self.stream_output = stream_output
         self.plugin_cache = plugin_cache or ""
         self.tf_bin = tf_bin
+        self.env = env
 
     def apply(self, plan=True):
         """run terraform apply"""
@@ -115,6 +115,12 @@ class TerraformRunner(object):
             tf_env["TF_DATA_DIR"] = self.work_dir
         cwd = self.module_dir or self.work_dir
         env.update(tf_env)
+        if self.env is not None:
+            if isinstance(self.env, dict):
+                env.update(self.env)
+            else:
+                # Expected to be a callable that returns a dict.
+                env.update(self.env())
 
         write_log("run cmd", args, tf_env, cwd)
         run_cmd = subprocess.check_call
@@ -385,9 +391,7 @@ class TerraformFixture(object):
             self.test_dir.dirpath().join("terraform", self.tf_root_module),
         ]
         if LazyModuleDir.resolve():
-            candidates.insert(
-                0, local(LazyModuleDir.resolve()).join(self.tf_root_module)
-            )
+            candidates.insert(0, local(LazyModuleDir.resolve()).join(self.tf_root_module))
         for candidate in candidates:
             if not candidate.check(exists=1, dir=1):
                 continue
@@ -413,9 +417,7 @@ class TerraformFixture(object):
             return TerraformTestApi.from_file(
                 os.path.join(module_dir, "tf_resources.json")
             )
-        work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join(
-            "work"
-        )
+        work_dir = tmpdir_factory.mktemp(self.tf_root_module, numbered=True).join("work")
         self.runner = self.get_runner(module_dir, work_dir)
         return self.create(request, module_dir)
 
